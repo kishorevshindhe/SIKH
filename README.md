@@ -171,10 +171,5 @@ OPENAI_API_KEY=your_openai_key_here
 
 ---
 
-## Rules
 
-- ❌ **Never push directly to `main`**
-- ❌ **Never commit `.env` files or API keys**
-- ✅ Always pull from `dev` before starting work
-- ✅ Use descriptive commit messages with the correct prefix
-- ✅ Open a Pull Request when your feature is ready — don't merge yourself
+
