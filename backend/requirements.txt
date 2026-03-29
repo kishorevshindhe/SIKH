@@ -1,0 +1,40 @@
+# SIKH Backend Dependencies
+# Install with: pip install -r requirements.txt
+
+# Web Framework
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+
+# Database
+sqlalchemy==2.0.29
+psycopg2-binary==2.9.9       # PostgreSQL driver
+alembic==1.13.1               # DB migrations
+
+# Authentication
+python-jose[cryptography]==3.3.0   # JWT
+passlib[bcrypt]==1.7.4             # Password hashing
+python-multipart==0.0.9            # Form data
+
+# WebSockets (real-time chat)
+websockets==12.0
+
+# Redis (caching)
+redis==5.0.3
+
+# Environment variables
+python-dotenv==1.0.1
+
+# Security / Encryption
+cryptography==42.0.5
+
+# HTTP Client (for AI API calls)
+httpx==0.27.0
+
+# File handling
+python-multipart==0.0.9
+aiofiles==23.2.1
+
+# Testing
+pytest==8.1.1
+pytest-asyncio==0.23.6
+httpx==0.27.0                 # For test client
