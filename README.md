@@ -10,10 +10,9 @@ A web-based collaborative learning platform that integrates AI assistance, intel
 
 | Member | Role | Branch |
 |--------|------|--------|
-| Member 1 | Backend + Chat + Security | `feature/backend` |
-| Member 2 | AI + Automation | `feature/ai` |
-| Member 3 | Frontend + Search | `feature/frontend` |
-| Member 4 (Claude) | AI Coding Assistant | — |
+| KISHORE V | Backend + Chat + Security | `feature/backend` |
+| LIKHITH D GIRISH | AI + Automation | `feature/ai` |
+| JASH ASHISH LADANI | Frontend + Search | `feature/frontend` |
 
 ---
 
