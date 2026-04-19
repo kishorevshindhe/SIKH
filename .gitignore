@@ -5,3 +5,8 @@ __pycache__/
 sikh.db
 .env
 *.db
+.env
+sikh.db
+.venv/
+__pycache__/
+*.pyc
