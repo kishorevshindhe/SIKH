@@ -1,80 +1,18 @@
 # SIKH — Secure Intelligent Knowledge Hub
 
-> **Final Year Project** | Version 1.0 | March 2026
+> Final Year Project | Version 1.0 | 2026
 
-SIKH is a web-based collaborative learning platform that integrates artificial intelligence, intelligent search, secure real-time communication, and community interaction into a single unified system. Designed as an intelligent academic ecosystem, SIKH brings together multiple disciplines of computer science — including AI, Information Retrieval, Networking, Cybersecurity, and Distributed Systems — to deliver a seamless learning experience.
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Core Features](#core-features)
-- [Tech Stack](#tech-stack)
-- [Team](#team)
-- [Repository Structure](#repository-structure)
-- [Getting Started](#getting-started)
-- [Branching Strategy](#branching-strategy)
-- [Development Phases](#development-phases)
-- [Environment Variables](#environment-variables)
-- [Commit Convention](#commit-convention)
-
----
-
-## Overview
-
-Traditional learning platforms lack real-time collaboration, intelligent document analysis, and secure communication in one place. SIKH solves this by combining:
-
-- An **AI-powered assistant** for academic help and document summarization
-- An **intelligent search engine** built on TF-IDF and Cosine Similarity
-- A **real-time chat system** with public rooms, private study lobbies, and direct messaging
-- **Voice communication** inside private study rooms via WebRTC
-- **Secure file management** with PDF and document analysis
-- A **question paper analysis system** that predicts high-probability exam topics
-
----
-
-## Core Features
-
-| Feature | Description |
-|---------|-------------|
-| AI Assistant | Academic Q&A, document summarization, concept explanations |
-| Intelligent Search | TF-IDF ranked search across uploaded documents and web sources |
-| Public Chat | Open text-based discussion for all users |
-| Private Study Rooms | Invite-only rooms with text and voice chat (max 2 rooms per user) |
-| Direct Messaging | Private messaging between users via user ID |
-| Voice Chat | Real-time voice communication inside private rooms via WebRTC |
-| File Uploads | Upload PDFs, notes, and question papers with text extraction |
-| Question Paper Analysis | Topic extraction and exam probability estimation using ML |
-| Secure Authentication | JWT-based login with bcrypt password hashing |
-| Role-Based Access Control | Admin and user role management |
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Backend | Python — FastAPI |
-| Frontend | HTML, CSS, JavaScript — React |
-| Database | PostgreSQL (production), SQLite (development) |
-| AI Integration | OpenAI API |
-| Search Engine | Scikit-learn, NLTK |
-| Web Automation | Selenium, BeautifulSoup |
-| Real-time Chat | WebSockets |
-| Voice Chat | WebRTC |
-| Authentication | JWT Tokens |
-| Caching | Redis |
+A web-based collaborative learning platform that integrates AI assistance, intelligent search, secure real-time communication, and community interaction into one unified system.
 
 ---
 
 ## Team
 
-| Member | Role | Branch |
-|--------|------|--------|
-| Kishore V | Backend + Chat + Security | `feature/backend` |
-| Likhith D Girish | AI + Automation | `feature/ai` |
-| Jash Ashish Ladani | Frontend + Search | `feature/frontend` |
+| Member | Name | Role | Branch |
+|--------|------|------|--------|
+| Member 1 | Kishore V | Backend + Chat + Security | `feature/backend` |
+| Member 2 | Likhith D Girish | AI + Automation | `feature/ai` |
+| Member 3 | Jash Ashish Ladani | Frontend + Search | `feature/frontend` |
 
 ---
 
@@ -82,29 +20,29 @@ Traditional learning platforms lack real-time collaboration, intelligent documen
 
 ```
 SIKH/
-├── backend/                  ← Kishore V (FastAPI, Auth, Chat, WebSockets)
-│   ├── auth/                 ← JWT authentication, RBAC, protected routes
-│   ├── chat/                 ← WebSocket chat, private rooms, direct messaging
-│   ├── security/             ← Encryption, intrusion detection
-│   └── api/                  ← REST API routes
+├── backend/                   <- Member 1 (Python, FastAPI, Auth, Chat, WebSockets)
+│   ├── auth/                  <- JWT authentication, bcrypt, RBAC
+│   ├── chat/                  <- WebSocket chat, rooms, DMs, voice lobby
+│   ├── database/              <- SQLAlchemy models, SQLite (dev) / PostgreSQL (prod)
+│   ├── security/              <- AES-256 file encryption, intrusion detection
+│   └── main.py                <- FastAPI app entry point
 │
-├── frontend/                 ← Jash Ashish Ladani (HTML/CSS/JS, React)
-│   ├── src/                  ← React components and JavaScript
-│   ├── components/           ← Reusable UI components
-│   └── public/               ← Static assets
+├── frontend/                  <- Member 3 (React, HTML, CSS, JS)
+│   ├── src/                   <- React components
+│   ├── components/            <- Reusable UI components
+│   └── public/                <- Static assets
 │
-├── ai_module/                ← Likhith D Girish (AI API, ML, Automation)
-│   ├── assistant/            ← AI chatbot integration (OpenAI API)
-│   ├── question_paper/       ← Question paper analysis, topic extraction
-│   └── automation/           ← Selenium, web scraping
+├── ai_module/                 <- Member 2 (OpenAI API, ML, Automation)
+│   ├── assistant/             <- AI chatbot integration
+│   ├── question_paper/        <- Question paper analysis, topic extraction
+│   └── automation/            <- Selenium, web scraping
 │
-├── search_engine/            ← Jash Ashish Ladani (TF-IDF, Cosine Similarity)
-│   ├── indexing/             ← Inverted index, tokenization, stop-word removal
-│   └── algorithms/           ← TF-IDF, cosine similarity ranking
+├── search_engine/             <- Member 3 (TF-IDF, Cosine Similarity)
+│   ├── indexing/              <- Inverted index, tokenization
+│   └── algorithms/            <- TF-IDF, cosine similarity
 │
-├── security/                 ← Kishore V (shared security utilities)
-├── docs/                     ← Shared project documentation
-├── tests/                    ← All test files
+├── docs/                      <- Shared documentation
+├── tests/                     <- All test files
 │   ├── backend/
 │   ├── frontend/
 │   └── ai/
@@ -114,28 +52,91 @@ SIKH/
 
 ---
 
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | Python, FastAPI |
+| Frontend | React, HTML, CSS, JavaScript |
+| Database | SQLite (dev), PostgreSQL (prod) |
+| AI | OpenAI API |
+| Search | Scikit-learn, NLTK, TF-IDF, Cosine Similarity |
+| Real-time Chat | WebSockets |
+| Voice Chat | WebRTC |
+| Authentication | JWT Tokens, bcrypt |
+| File Security | AES-256 Encryption |
+| Caching | Redis |
+
+---
+
+## Branching Strategy
+
+```
+main               <- Stable, production-ready code only. No direct pushes.
+dev                <- Integration branch. All features merge here first.
+feature/backend    <- Member 1
+feature/ai         <- Member 2
+feature/frontend   <- Member 3
+```
+
+### Daily Git Workflow
+
+```bash
+# 1. Always start by pulling the latest dev
+git pull origin dev
+
+# 2. Switch to your own branch
+git checkout feature/your-branch
+
+# 3. Work on your module
+
+# 4. Stage and commit
+git add .
+git commit -m "feat: short description of what you did"
+
+# 5. Push your branch
+git push origin feature/your-branch
+
+# 6. When feature is complete, open a Pull Request into dev
+#    Do not merge yourself
+```
+
+### Commit Message Prefixes
+
+| Prefix | Use |
+|--------|-----|
+| `feat:` | New feature |
+| `fix:` | Bug fix |
+| `docs:` | Documentation update |
+| `style:` | UI or CSS changes only |
+| `refactor:` | Code cleanup with no feature change |
+| `test:` | Adding or updating tests |
+| `security:` | Security-related changes |
+
+---
+
 ## Getting Started
 
-### Prerequisites
-
-- Python 3.10+
-- Node.js 18+
-- Git
-
-### Backend
+### Backend (Member 1)
 
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+python -m venv .venv
+
+# Windows (PowerShell)
+.venv\Scripts\activate
+
+# Mac / Linux
+source .venv/bin/activate
+
 pip install -r requirements.txt
-uvicorn main:app --reload
+uvicorn main:app --port 9000 --reload
 ```
 
-API will be available at `http://localhost:8000`
-Interactive docs at `http://localhost:8000/docs`
+API docs available at: http://localhost:9000/docs  
+Chat tester available at: http://localhost:9000/test-chat
 
-### Frontend
+### Frontend (Member 3)
 
 ```bash
 cd frontend
@@ -143,72 +144,19 @@ npm install
 npm start
 ```
 
-### AI Module
+### AI Module (Member 2)
 
 ```bash
 cd ai_module
 pip install -r requirements.txt
-# Add your OpenAI API key to .env before running
+# Add your API key to .env (never commit this)
 ```
-
----
-
-## Branching Strategy
-
-```
-main              ← Stable, production-ready code only. No direct pushes.
-dev               ← Integration branch. All features merge here first.
-feature/backend   ← Kishore V
-feature/ai        ← Likhith D Girish
-feature/frontend  ← Jash Ashish Ladani
-```
-
-### Daily Git Workflow
-
-```bash
-# 1. Pull the latest changes from dev before starting
-git pull origin dev
-
-# 2. Switch to your own feature branch
-git checkout feature/your-branch
-
-# 3. Work on your assigned module
-
-# 4. Stage and commit your changes
-git add .
-git commit -m "feat: describe what you built"
-
-# 5. Push to your branch
-git push origin feature/your-branch
-
-# 6. When your feature is complete, open a Pull Request into dev
-```
-
-> **Rules:**
-> - Never push directly to `main`
-> - Never commit `.env` files or API keys
-> - Always pull from `dev` before starting work
-
----
-
-## Development Phases
-
-| Phase | Title | Status |
-|-------|-------|--------|
-| 1 | Planning & Design | ✅ Complete |
-| 2 | Backend Development | 🔄 In Progress |
-| 3 | Search Engine | 🔄 In Progress |
-| 4 | AI Integration | 🔄 In Progress |
-| 5 | Community System | ⏳ Pending |
-| 6 | Security | ⏳ Pending |
-| 7 | Integration & Testing | ⏳ Pending |
-| 8 | Deployment | ⏳ Pending |
 
 ---
 
 ## Environment Variables
 
-Each member must create a `.env` file inside their module directory. **Never commit `.env` files.**
+Each member must create a `.env` file in their module directory. Never commit `.env` files.
 
 ```env
 # backend/.env
@@ -222,19 +170,103 @@ OPENAI_API_KEY=your_openai_key_here
 
 ---
 
-## Commit Convention
+## Backend API Reference
 
-All commits must follow this prefix format for consistency:
+### Authentication
 
-| Prefix | Purpose |
-|--------|---------|
-| `feat:` | New feature added |
-| `fix:` | Bug fix |
-| `docs:` | Documentation update |
-| `style:` | UI or CSS changes only |
-| `refactor:` | Code restructure without feature change |
-| `test:` | Adding or updating tests |
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/auth/register` | Register a new user | No |
+| POST | `/auth/login` | Login and receive JWT token | No |
+| GET | `/auth/me` | Get current user info | Yes |
+
+### Chat — WebSocket Endpoints
+
+| Type | Endpoint | Description | Auth Required |
+|------|----------|-------------|---------------|
+| WS | `/ws/public?token=` | Public chat room | Yes |
+| WS | `/ws/room/{room_id}?token=` | Private study room | Yes |
+| WS | `/ws/dm?token=` | Direct messaging | Yes |
+| WS | `/ws/voice/{room_id}?token=` | Voice lobby (WebRTC) | Yes |
+
+### Rooms
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/rooms/create` | Create a new room | Yes |
+| POST | `/rooms/{room_id}/invite` | Invite a user to a room | Yes (creator only) |
+| GET | `/rooms/{room_id}/messages` | Get room chat history | Yes (members only) |
+| GET | `/dm/{username}/messages` | Get DM history | Yes |
+
+### Files
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/files/dm/{to_username}` | Upload file via DM | Yes |
+| POST | `/files/room/{room_id}` | Upload file to a room | Yes |
+| GET | `/files/download/{file_id}` | Download a file | Yes |
+| GET | `/files/pending` | List files pending download | Yes |
 
 ---
 
-*SIKH — Built as a Final Year Project, March 2026.*
+## Chat Features
+
+| Feature | Description |
+|---------|-------------|
+| Public Chat | All logged-in users can talk. Messages are in-memory (not persisted). |
+| Room Chat | Invite-only private rooms. Messages saved to database. |
+| Direct Messages | One-to-one private messaging. Messages saved to database. Offline delivery supported. |
+| Voice Lobby | WebRTC-based real-time voice chat inside a private room. |
+| File Sharing | AES-256 encrypted file transfer via DM or room chat. Files stored temporarily and deleted after download. |
+
+---
+
+## Security Features
+
+| Feature | Implementation |
+|---------|----------------|
+| Password hashing | bcrypt (version 4.0.1) |
+| Authentication | JWT tokens with 30-minute expiry |
+| WebSocket auth | JWT token passed as query parameter on connect |
+| Role-based access | Admin and user roles enforced on all routes |
+| File encryption | AES-256-GCM via Python cryptography library |
+| File access control | Only sender and receiver (or room members) can download files |
+| Auto file deletion | DM files deleted from server after both parties download |
+
+---
+
+## Development Phases
+
+| Phase | Title | Owner | Status |
+|-------|-------|-------|--------|
+| 1 | Planning and Design | All | Done |
+| 2 | Backend — Auth, DB, Security | Member 1 | Done |
+| 3 | Backend — Chat System | Member 1 | Done |
+| 4 | Backend — File Upload | Member 1 | Done |
+| 5 | AI Integration | Member 2 | In Progress |
+| 6 | Frontend Development | Member 3 | In Progress |
+| 7 | Search Engine | Member 3 | Pending |
+| 8 | Integration and Testing | All | Pending |
+| 9 | Deployment | All | Pending |
+
+---
+
+## Deployment Plan
+
+| Module | Platform |
+|--------|----------|
+| Frontend | Vercel |
+| Backend | Railway or Render |
+| Database | PostgreSQL on cloud |
+
+---
+
+## Rules
+
+- Never push directly to `main`
+- Never commit `.env` files, API keys, or encryption keys
+- Never commit `__pycache__`, `.venv`, or database files
+- Always pull from `dev` before starting work
+- Use descriptive commit messages with the correct prefix
+- Open a Pull Request when your feature is ready — do not merge yourself
+- Always test your module before opening a Pull Request
