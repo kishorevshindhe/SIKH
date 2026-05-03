@@ -160,11 +160,11 @@ OPENAI_API_KEY=your_openai_key_here
 
 | Phase | Title | Status |
 |-------|-------|--------|
-| 1 | Planning & Design | ✅ Done |
-| 2 | Backend Development | 🔄 In Progress |
-| 3 | Search Engine | ⏳ Pending |
-| 4 | AI Integration | ⏳ Pending |
-| 5 | Community System | ⏳ Pending |
+| 1 | Planning & Design |  Done |
+| 2 | Backend Development |  In Progress |
+| 3 | Search Engine |  Pending |
+| 4 | AI Integration | Done |
+| 5 | Community System | Done |
 | 6 | Security | ⏳ Pending |
 | 7 | Integration & Testing | ⏳ Pending |
 | 8 | Deployment | ⏳ Pending |
