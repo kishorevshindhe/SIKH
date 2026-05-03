@@ -62,3 +62,23 @@ class Message(Base):
     sender   = relationship("User", foreign_keys=[sender_id], back_populates="sent_messages")
     receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_messages")
     room     = relationship("Room", back_populates="messages")
+    # ── Temporary File Storage ─────────────────────────────────────────────
+class PendingFile(Base):
+    __tablename__ = "pending_files"
+
+    id           = Column(Integer, primary_key=True, index=True)
+    file_id      = Column(String, unique=True, nullable=False)  # unique token to fetch file
+    filename     = Column(String, nullable=False)
+    filesize     = Column(Integer, nullable=False)
+    filetype     = Column(String, nullable=False)
+    encrypted_data = Column(Text, nullable=False)              # base64 encrypted file
+    sender_id    = Column(Integer, ForeignKey("users.id"), nullable=False)
+    receiver_id  = Column(Integer, ForeignKey("users.id"), nullable=True)   # DM
+    room_id      = Column(Integer, ForeignKey("rooms.id"), nullable=True)   # Room
+    chat_type    = Column(String, nullable=False)              # "dm" or "room"
+    downloaded_by = Column(Text, default="[]")                 # JSON list of user ids who downloaded
+    created_at   = Column(DateTime, server_default=func.now())
+
+    sender   = relationship("User", foreign_keys=[sender_id])
+    receiver = relationship("User", foreign_keys=[receiver_id])
+    room     = relationship("Room", foreign_keys=[room_id])

@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from database.database import engine, Base
 from auth.routes import router as auth_router
 from chat.routes import router as chat_router
+from chat.file_routes import router as file_router
 
-# Create database tables automatically
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -14,7 +14,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Allow all origins for development
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,9 +22,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register routers
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 app.include_router(chat_router, tags=["Chat"])
+app.include_router(file_router, tags=["Files"])
 
 @app.get("/")
 def home():
