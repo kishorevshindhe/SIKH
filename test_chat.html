@@ -1,167 +1,302 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>SIKH Chat Test</title>
+  <meta charset="UTF-8" />
+  <title>SIKH Chat Tester</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 700px; margin: 30px auto; padding: 20px; }
-    h2 { color: #333; }
-    .section { border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
-    .section h3 { margin-top: 0; color: #444; }
-    #messages, #room-messages, #dm-messages { border: 1px solid #ccc; height: 180px; overflow-y: auto; padding: 10px; margin-bottom: 10px; border-radius: 8px; background: #f9f9f9; font-size: 13px; }
-    .message { margin: 4px 0; padding: 5px 10px; background: #fff; border-radius: 6px; border-left: 3px solid #4CAF50; }
-    .system { border-left-color: #2196F3; color: #555; }
-    .dm { border-left-color: #9C27B0; }
-    input[type=text] { padding: 8px; width: 60%; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; }
-    button { padding: 8px 14px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; margin-left: 4px; font-size: 13px; }
-    button:hover { background: #45a049; }
-    .status { font-weight: bold; margin-bottom: 8px; font-size: 13px; }
-    .connected { color: green; }
-    .disconnected { color: red; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
+    h1 { color: #e94560; margin-bottom: 20px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab { padding: 10px 20px; background: #16213e; border: none; color: #eee; cursor: pointer; border-radius: 6px; font-size: 14px; }
+    .tab.active { background: #e94560; }
+    .panel { display: none; background: #16213e; padding: 20px; border-radius: 10px; }
+    .panel.active { display: block; }
+    input, textarea { width: 100%; padding: 10px; margin: 6px 0 12px; background: #0f3460; border: none; color: #eee; border-radius: 6px; font-size: 14px; }
+    button { padding: 10px 20px; background: #e94560; border: none; color: white; border-radius: 6px; cursor: pointer; margin-right: 8px; font-size: 14px; }
+    button:hover { background: #c73652; }
+    button.green { background: #2ecc71; }
+    button.green:hover { background: #27ae60; }
+    button.red { background: #e74c3c; }
+    .messages { background: #0f3460; padding: 15px; border-radius: 6px; height: 250px; overflow-y: auto; margin: 12px 0; font-size: 13px; line-height: 1.8; }
+    .status { font-size: 12px; color: #2ecc71; margin-bottom: 10px; }
+    .status.off { color: #e74c3c; }
+    label { font-size: 13px; color: #aaa; }
   </style>
 </head>
 <body>
 
-  <h2>SIKH — Chat System Test</h2>
+<h1>🔒 SIKH Chat Tester</h1>
 
-  <!-- PUBLIC CHAT -->
-  <div class="section">
-    <h3>🌐 Public Chat</h3>
-    <div class="status disconnected" id="public-status">Not connected</div>
-    <div id="messages"></div>
-    <input type="text" id="pub-username" placeholder="Your username" />
-    <button onclick="connectPublic()">Connect</button>
-    <br><br>
-    <input type="text" id="pub-message" placeholder="Type a message..." />
-    <button onclick="sendPublic()">Send</button>
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('login')">🔑 Login</button>
+  <button class="tab" onclick="showTab('public')">🌐 Public</button>
+  <button class="tab" onclick="showTab('room')">🏠 Room</button>
+  <button class="tab" onclick="showTab('dm')">💬 DM</button>
+  <button class="tab" onclick="showTab('voice')">🎙️ Voice</button>
+</div>
+
+<!-- Login Panel -->
+<div id="tab-login" class="panel active">
+  <h3 style="margin-bottom:15px">Login to get your token</h3>
+  <label>Email</label>
+  <input id="login-email" placeholder="Enter your email" />
+  <label>Password</label>
+  <input id="login-password" type="password" placeholder="Enter your password" />
+  <button class="green" onclick="doLogin()">Login</button>
+  <div style="margin-top:15px">
+    <label>Your Token (auto-filled after login):</label>
+    <textarea id="token-display" rows="3" placeholder="Token will appear here..."></textarea>
   </div>
+</div>
 
-  <!-- PRIVATE ROOM -->
-  <div class="section">
-    <h3>🔒 Private Study Room</h3>
-    <div class="status disconnected" id="room-status">Not connected</div>
-    <div id="room-messages"></div>
-    <input type="text" id="room-username" placeholder="Your username" />
-    <input type="text" id="room-id" placeholder="Room ID (e.g. room1)" />
-    <button onclick="connectRoom()">Join Room</button>
-    <br><br>
-    <input type="text" id="room-message" placeholder="Type a message..." />
-    <button onclick="sendRoom()">Send</button>
-  </div>
+<!-- Public Chat Panel -->
+<div id="tab-public" class="panel">
+  <h3 style="margin-bottom:15px">🌐 Public Chat</h3>
+  <div id="public-status" class="status off">● Disconnected</div>
+  <button class="green" onclick="connectPublic()">Connect</button>
+  <button class="red" onclick="disconnectPublic()">Disconnect</button>
+  <div class="messages" id="public-messages"></div>
+  <input id="public-input" placeholder="Type a message..." />
+  <button onclick="sendPublic()">Send</button>
+</div>
 
-  <!-- DIRECT MESSAGE -->
-  <div class="section">
-    <h3>💬 Direct Message</h3>
-    <div class="status disconnected" id="dm-status">Not connected</div>
-    <div id="dm-messages"></div>
-    <input type="text" id="dm-myid" placeholder="Your user ID" />
-    <button onclick="connectDM()">Connect</button>
-    <br><br>
-    <input type="text" id="dm-toid" placeholder="Send to user ID" />
-    <input type="text" id="dm-message" placeholder="Type a message..." />
-    <button onclick="sendDM()">Send DM</button>
-  </div>
+<!-- Room Chat Panel -->
+<div id="tab-room" class="panel">
+  <h3 style="margin-bottom:15px">🏠 Room Chat</h3>
+  <label>Room ID</label>
+  <input id="room-id" placeholder="1" value="1" />
+  <div id="room-status" class="status off">● Disconnected</div>
+  <button class="green" onclick="connectRoom()">Connect</button>
+  <button class="red" onclick="disconnectRoom()">Disconnect</button>
+  <div class="messages" id="room-messages"></div>
+  <input id="room-input" placeholder="Type a message..." />
+  <button onclick="sendRoom()">Send</button>
+</div>
 
-  <script>
-    const PORT = window.location.port;
-    const WS = `ws://localhost:${PORT}`;
+<!-- DM Panel -->
+<div id="tab-dm" class="panel">
+  <h3 style="margin-bottom:15px">💬 Direct Message</h3>
+  <div id="dm-status" class="status off">● Disconnected</div>
+  <button class="green" onclick="connectDM()">Connect</button>
+  <button class="red" onclick="disconnectDM()">Disconnect</button>
+  <div class="messages" id="dm-messages"></div>
+  <label>Send to username</label>
+  <input id="dm-to" placeholder="Enter username" />
+  <label>Message</label>
+  <input id="dm-input" placeholder="Type a message..." />
+  <button onclick="sendDM()">Send</button>
+</div>
 
-    let pubWs, roomWs, dmWs;
+<!-- Voice Panel -->
+<div id="tab-voice" class="panel">
+  <h3 style="margin-bottom:15px">🎙️ Voice Lobby</h3>
+  <label>Room ID</label>
+  <input id="voice-room-id" placeholder="1" value="1" />
+  <div id="voice-status" class="status off">● Disconnected</div>
+  <button class="green" onclick="connectVoice()">Join Voice</button>
+  <button class="red" onclick="disconnectVoice()">Leave Voice</button>
+  <div class="messages" id="voice-messages"></div>
+  <div id="remote-audio"></div>
+</div>
 
-    function addMessage(containerId, text, type="message") {
-      const box = document.getElementById(containerId);
-      const div = document.createElement("div");
-      div.classList.add(type);
-      div.innerText = text;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-    }
+<script>
+  const BASE = "ws://localhost:9000";
+  const API  = "http://localhost:9000";
+  let token = "";
+  let publicWS, roomWS, dmWS, voiceWS;
+  let peerConnections = {};
 
-    // PUBLIC CHAT
-    function connectPublic() {
-      const username = document.getElementById("pub-username").value.trim();
-      if (!username) return alert("Enter a username!");
-      pubWs = new WebSocket(`${WS}/ws/public/${username}`);
-      pubWs.onopen = () => {
-        document.getElementById("public-status").className = "status connected";
-        document.getElementById("public-status").innerText = `Connected as ${username}`;
-      };
-      pubWs.onmessage = (e) => {
-        const type = e.data.startsWith("[System]") ? "system" : "message";
-        addMessage("messages", e.data, type);
-      };
-      pubWs.onclose = () => {
-        document.getElementById("public-status").className = "status disconnected";
-        document.getElementById("public-status").innerText = "Disconnected";
-      };
-    }
-    function sendPublic() {
-      const msg = document.getElementById("pub-message");
-      if (pubWs && pubWs.readyState === WebSocket.OPEN && msg.value.trim()) {
-        pubWs.send(msg.value.trim());
-        msg.value = "";
-      }
-    }
+  // ── Tab switching ───────────────────────────────────────────────────
+  function showTab(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
 
-    // PRIVATE ROOM
-    function connectRoom() {
-      const username = document.getElementById("room-username").value.trim();
-      const roomId = document.getElementById("room-id").value.trim();
-      if (!username || !roomId) return alert("Enter username and room ID!");
-      roomWs = new WebSocket(`${WS}/ws/room/${roomId}/${username}`);
-      roomWs.onopen = () => {
-        document.getElementById("room-status").className = "status connected";
-        document.getElementById("room-status").innerText = `Connected as ${username} in room: ${roomId}`;
-      };
-      roomWs.onmessage = (e) => {
-        const type = e.data.startsWith("[System]") ? "system" : "message";
-        addMessage("room-messages", e.data, type);
-      };
-      roomWs.onclose = () => {
-        document.getElementById("room-status").className = "status disconnected";
-        document.getElementById("room-status").innerText = "Disconnected";
-      };
-    }
-    function sendRoom() {
-      const msg = document.getElementById("room-message");
-      if (roomWs && roomWs.readyState === WebSocket.OPEN && msg.value.trim()) {
-        roomWs.send(msg.value.trim());
-        msg.value = "";
-      }
-    }
-
-    // DIRECT MESSAGE
-    function connectDM() {
-      const myId = document.getElementById("dm-myid").value.trim();
-      if (!myId) return alert("Enter your user ID!");
-      dmWs = new WebSocket(`${WS}/ws/direct/${myId}`);
-      dmWs.onopen = () => {
-        document.getElementById("dm-status").className = "status connected";
-        document.getElementById("dm-status").innerText = `Connected as ${myId}`;
-      };
-      dmWs.onmessage = (e) => addMessage("dm-messages", e.data, "dm");
-      dmWs.onclose = () => {
-        document.getElementById("dm-status").className = "status disconnected";
-        document.getElementById("dm-status").innerText = "Disconnected";
-      };
-    }
-    function sendDM() {
-      const toId = document.getElementById("dm-toid").value.trim();
-      const msg = document.getElementById("dm-message");
-      if (dmWs && dmWs.readyState === WebSocket.OPEN && toId && msg.value.trim()) {
-        dmWs.send(`${toId}:${msg.value.trim()}`);
-        msg.value = "";
-      }
-    }
-
-    // Enter key support
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        if (document.activeElement.id === "pub-message") sendPublic();
-        if (document.activeElement.id === "room-message") sendRoom();
-        if (document.activeElement.id === "dm-message") sendDM();
-      }
+  // ── Login ───────────────────────────────────────────────────────────
+  async function doLogin() {
+    const email    = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const res = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
     });
-  </script>
+    const data = await res.json();
+    if (data.access_token) {
+      token = data.access_token;
+      document.getElementById('token-display').value = token;
+      alert('✅ Logged in! Token saved. You can now use other tabs.');
+    } else {
+      alert('❌ Login failed: ' + JSON.stringify(data));
+    }
+  }
 
+  // ── Log to message box ──────────────────────────────────────────────
+  function log(id, msg) {
+    const box = document.getElementById(id);
+    box.innerHTML += `<div>${msg}</div>`;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function setStatus(id, connected) {
+    const el = document.getElementById(id);
+    el.textContent = connected ? '● Connected' : '● Disconnected';
+    el.className = connected ? 'status' : 'status off';
+  }
+
+  // ── Public Chat ─────────────────────────────────────────────────────
+  function connectPublic() {
+    if (!token) return alert('Login first!');
+    publicWS = new WebSocket(`${BASE}/ws/public?token=${token}`);
+    publicWS.onopen    = () => setStatus('public-status', true);
+    publicWS.onmessage = e => log('public-messages', e.data);
+    publicWS.onclose   = () => setStatus('public-status', false);
+  }
+  function disconnectPublic() { publicWS && publicWS.close(); }
+  function sendPublic() {
+    const msg = document.getElementById('public-input').value;
+    if (publicWS && msg) { publicWS.send(msg); document.getElementById('public-input').value = ''; }
+  }
+
+  // ── Room Chat ───────────────────────────────────────────────────────
+  function connectRoom() {
+    if (!token) return alert('Login first!');
+    const roomId = document.getElementById('room-id').value;
+    roomWS = new WebSocket(`${BASE}/ws/room/${roomId}?token=${token}`);
+    roomWS.onopen    = () => setStatus('room-status', true);
+    roomWS.onmessage = e => log('room-messages', e.data);
+    roomWS.onclose   = () => setStatus('room-status', false);
+  }
+  function disconnectRoom() { roomWS && roomWS.close(); }
+  function sendRoom() {
+    const msg = document.getElementById('room-input').value;
+    if (roomWS && msg) { roomWS.send(msg); document.getElementById('room-input').value = ''; }
+  }
+
+  // ── DM ──────────────────────────────────────────────────────────────
+  function connectDM() {
+    if (!token) return alert('Login first!');
+    dmWS = new WebSocket(`${BASE}/ws/dm?token=${token}`);
+    dmWS.onopen    = () => setStatus('dm-status', true);
+    dmWS.onmessage = e => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.type === 'error') {
+          log('dm-messages', `⚠️ ${data.message}`);
+        } else {
+          log('dm-messages', e.data);
+        }
+      } catch {
+        log('dm-messages', e.data);
+      }
+    };
+    dmWS.onclose   = () => setStatus('dm-status', false);
+  }
+  function disconnectDM() { dmWS && dmWS.close(); }
+  function sendDM() {
+    const to  = document.getElementById('dm-to').value;
+    const msg = document.getElementById('dm-input').value;
+    if (dmWS && to && msg) {
+      dmWS.send(JSON.stringify({ to, message: msg }));
+      log('dm-messages', `[You → ${to}]: ${msg}`);
+      document.getElementById('dm-input').value = '';
+    }
+  }
+
+  // ── Voice Lobby (WebRTC) ────────────────────────────────────────────
+  const iceServers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+  function connectVoice() {
+    if (!token) return alert('Login first!');
+    const roomId = document.getElementById('voice-room-id').value;
+    voiceWS = new WebSocket(`${BASE}/ws/voice/${roomId}?token=${token}`);
+    voiceWS.onopen    = () => { setStatus('voice-status', true); log('voice-messages', '🎙️ Joined voice lobby'); }
+    voiceWS.onclose   = () => setStatus('voice-status', false);
+    voiceWS.onmessage = async e => {
+      const data = JSON.parse(e.data);
+      log('voice-messages', `📡 Signal: ${data.type} ${data.from ? 'from ' + data.from : ''}`);
+      await handleVoiceSignal(data);
+    };
+  }
+
+  function disconnectVoice() {
+    voiceWS && voiceWS.close();
+    Object.values(peerConnections).forEach(pc => pc.close());
+    peerConnections = {};
+    log('voice-messages', '🔴 Left voice lobby');
+  }
+
+  async function handleVoiceSignal(data) {
+    const from = data.from;
+    if (data.type === 'user_joined_voice') {
+      log('voice-messages', `👤 ${from} joined voice — starting call...`);
+      await startCall(from);
+    } else if (data.type === 'offer') {
+      await handleOffer(from, data.offer);
+    } else if (data.type === 'answer') {
+      await peerConnections[from]?.setRemoteDescription(data.answer);
+    } else if (data.type === 'ice') {
+      await peerConnections[from]?.addIceCandidate(data.candidate);
+    } else if (data.type === 'user_left_voice') {
+      log('voice-messages', `👤 ${from} left voice`);
+      peerConnections[from]?.close();
+      delete peerConnections[from];
+    }
+  }
+
+  async function startCall(toUsername) {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const pc = new RTCPeerConnection(iceServers);
+    peerConnections[toUsername] = pc;
+    stream.getTracks().forEach(t => pc.addTrack(t, stream));
+    pc.onicecandidate = e => {
+      if (e.candidate) voiceWS.send(JSON.stringify({ type: 'ice', to: toUsername, candidate: e.candidate }));
+    };
+    pc.ontrack = e => {
+      const audio = document.createElement('audio');
+      audio.srcObject = e.streams[0];
+      audio.autoplay = true;
+      document.getElementById('remote-audio').appendChild(audio);
+      log('voice-messages', `🔊 Receiving audio from ${toUsername}`);
+    };
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    voiceWS.send(JSON.stringify({ type: 'offer', to: toUsername, offer }));
+  }
+
+  async function handleOffer(fromUsername, offer) {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const pc = new RTCPeerConnection(iceServers);
+    peerConnections[fromUsername] = pc;
+    stream.getTracks().forEach(t => pc.addTrack(t, stream));
+    pc.onicecandidate = e => {
+      if (e.candidate) voiceWS.send(JSON.stringify({ type: 'ice', to: fromUsername, candidate: e.candidate }));
+    };
+    pc.ontrack = e => {
+      const audio = document.createElement('audio');
+      audio.srcObject = e.streams[0];
+      audio.autoplay = true;
+      document.getElementById('remote-audio').appendChild(audio);
+      log('voice-messages', `🔊 Receiving audio from ${fromUsername}`);
+    };
+    await pc.setRemoteDescription(offer);
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    voiceWS.send(JSON.stringify({ type: 'answer', to: fromUsername, answer }));
+  }
+
+  // Enter key to send
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (document.getElementById('tab-public').classList.contains('active')) sendPublic();
+      else if (document.getElementById('tab-room').classList.contains('active')) sendRoom();
+      else if (document.getElementById('tab-dm').classList.contains('active')) sendDM();
+    }
+  });
+</script>
 </body>
 </html>

@@ -97,18 +97,20 @@ class ChatManager:
         self.voice_connections[room_id][username] = websocket
         # Tell everyone else in the room that a new user joined voice
         await self.broadcast_voice(room_id, {
-            "type": "user_joined_voice",
-            "username": username
-        }, exclude=username)
+    "type": "user_joined_voice",
+    "from": username,
+    "username": username
+}, exclude=username)
 
     async def disconnect_voice(self, room_id: str, username: str):
         if room_id in self.voice_connections:
             if username in self.voice_connections[room_id]:
                 del self.voice_connections[room_id][username]
         await self.broadcast_voice(room_id, {
-            "type": "user_left_voice",
-            "username": username
-        })
+    "type": "user_left_voice",
+    "from": username,
+    "username": username
+})
 
     async def broadcast_voice(self, room_id: str, data: dict, exclude: str = None):
         import json
