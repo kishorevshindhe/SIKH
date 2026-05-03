@@ -10,3 +10,5 @@ sikh.db
 .venv/
 __pycache__/
 *.pyc
+
+.file_encryption_key
