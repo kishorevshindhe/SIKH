@@ -165,9 +165,9 @@ OPENAI_API_KEY=your_openai_key_here
 | 3 | Search Engine |  Pending |
 | 4 | AI Integration | Done |
 | 5 | Community System | Done |
-| 6 | Security | ⏳ Pending |
-| 7 | Integration & Testing | ⏳ Pending |
-| 8 | Deployment | ⏳ Pending |
+| 6 | Security |  Pending |
+| 7 | Integration & Testing |  Pending |
+| 8 | Deployment |  Pending |
 
 ---
 
