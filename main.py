@@ -1,10 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from database.database import engine, Base
 from auth.routes import router as auth_router
 from chat.routes import router as chat_router
 from chat.file_routes import router as file_router
+from security.rate_limiter import limiter
 
 Base.metadata.create_all(bind=engine)
 
@@ -13,6 +16,10 @@ app = FastAPI(
     description="Secure Intelligent Knowledge Hub",
     version="1.0.0"
 )
+
+# Attach rate limiter to app
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,

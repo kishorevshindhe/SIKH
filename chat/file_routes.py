@@ -1,7 +1,6 @@
 import json
 import uuid
-import base64
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from database.database import get_db
@@ -9,6 +8,7 @@ from database.models import User, Room, RoomMember, PendingFile
 from auth.dependencies import get_current_user
 from chat.file_crypto import encrypt_file, decrypt_file
 from chat.chat_manager import manager
+from security.rate_limiter import limiter
 
 router = APIRouter()
 
@@ -17,7 +17,9 @@ MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB limit
 
 # ── Upload file for DM ─────────────────────────────────────────────────
 @router.post("/files/dm/{to_username}")
+@limiter.limit("10/minute")
 async def upload_dm_file(
+    request: Request,
     to_username: str,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -63,7 +65,6 @@ async def upload_dm_file(
         "from": current_user.username,
         "download_url": f"/files/download/{file_id}"
     })
-
     await manager.send_direct(to_username, file_msg, from_username=current_user.username)
 
     return {
@@ -76,7 +77,9 @@ async def upload_dm_file(
 
 # ── Upload file for Room ───────────────────────────────────────────────
 @router.post("/files/room/{room_id}")
+@limiter.limit("10/minute")
 async def upload_room_file(
+    request: Request,
     room_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -137,7 +140,9 @@ async def upload_room_file(
 
 # ── Download file ──────────────────────────────────────────────────────
 @router.get("/files/download/{file_id}")
+@limiter.limit("30/minute")
 async def download_file(
+    request: Request,
     file_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -192,7 +197,9 @@ async def download_file(
 
 # ── List pending files for current user ───────────────────────────────
 @router.get("/files/pending")
+@limiter.limit("30/minute")
 def get_pending_files(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
