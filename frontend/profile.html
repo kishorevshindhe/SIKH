@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIKH — Profile Settings</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --bg:#080c10;
+  --panel:#0f1620;
+  --surface:#141d28;
+  --border:#243444;
+  --cyan:#00d4ff;
+  --magenta:#ff3a7a;
+  --green:#00e87a;
+  --text:#d0e8f0;
+  --text-dim:#6c8b98;
+}
+
+body {
+  margin:0;
+  font-family:'Exo 2', sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* NAV */
+.navbar {
+  height:60px;
+  background:var(--panel);
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  border-bottom:1px solid var(--border);
+}
+
+.logo {
+  font-weight:800;
+  letter-spacing:2px;
+}
+
+/* MAIN */
+.main {
+  padding:30px;
+  display:flex;
+  justify-content:center;
+}
+
+.container {
+  width:100%;
+  max-width:900px;
+}
+
+/* CARD */
+.card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:25px;
+  margin-bottom:20px;
+}
+
+.card h2 {
+  margin-bottom:20px;
+  font-size:18px;
+}
+
+/* INPUTS */
+.form-group {
+  margin-bottom:18px;
+}
+
+label {
+  font-size:11px;
+  color:var(--text-dim);
+  display:block;
+  margin-bottom:6px;
+  text-transform:uppercase;
+}
+
+input, select {
+  width:100%;
+  padding:10px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:6px;
+}
+
+input:focus {
+  outline:none;
+  border-color:var(--cyan);
+  box-shadow:0 0 0 2px rgba(0,212,255,0.2);
+}
+
+/* GRID */
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+/* BUTTON */
+.btn {
+  padding:12px;
+  border:none;
+  background:linear-gradient(135deg,var(--cyan),#009dc2);
+  color:black;
+  font-weight:700;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.btn:hover {
+  opacity:0.9;
+}
+
+/* AVATAR */
+.avatar {
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--cyan),var(--magenta));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:24px;
+  margin-bottom:10px;
+}
+
+/* SWITCH */
+.switch {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.toggle {
+  width:40px;
+  height:20px;
+  background:var(--surface);
+  border-radius:20px;
+  position:relative;
+  cursor:pointer;
+}
+
+.toggle::after {
+  content:'';
+  position:absolute;
+  width:16px;
+  height:16px;
+  background:var(--cyan);
+  border-radius:50%;
+  top:2px;
+  left:2px;
+  transition:0.3s;
+}
+
+.toggle.active::after {
+  left:22px;
+}
+
+/* SAVE MSG */
+.save-msg {
+  display:none;
+  margin-top:10px;
+  color:var(--green);
+  font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<div class="navbar">
+  <div class="logo">SIKH</div>
+</div>
+
+<div class="main">
+<div class="container">
+
+<!-- PROFILE -->
+<div class="card">
+  <h2>Profile Information</h2>
+
+  <div class="avatar">JL</div>
+
+  <div class="grid">
+    <div class="form-group">
+      <label>First Name</label>
+      <input type="text" placeholder="Jash">
+    </div>
+
+    <div class="form-group">
+      <label>Last Name</label>
+      <input type="text" placeholder="Ladani">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Email</label>
+    <input type="email" placeholder="you@example.com">
+  </div>
+
+  <div class="form-group">
+    <label>Role</label>
+    <select>
+      <option>Student</option>
+      <option>Faculty</option>
+      <option>Researcher</option>
+    </select>
+  </div>
+
+  <button class="btn" onclick="saveProfile()">Save Changes</button>
+  <div class="save-msg" id="saveMsg">✔ Profile updated successfully</div>
+</div>
+
+<!-- SECURITY -->
+<div class="card">
+  <h2>Security</h2>
+
+  <div class="form-group">
+    <label>New Password</label>
+    <input type="password">
+  </div>
+
+  <div class="form-group">
+    <label>Confirm Password</label>
+    <input type="password">
+  </div>
+
+  <button class="btn">Update Password</button>
+</div>
+
+<!-- SETTINGS -->
+<div class="card">
+  <h2>Preferences</h2>
+
+  <div class="switch">
+    <span>Email Notifications</span>
+    <div class="toggle" onclick="toggle(this)"></div>
+  </div>
+
+  <div class="switch">
+    <span>Dark Mode</span>
+    <div class="toggle active" onclick="toggle(this)"></div>
+  </div>
+
+</div>
+
+</div>
+</div>
+
+<script>
+function saveProfile(){
+  const msg = document.getElementById("saveMsg");
+  msg.style.display = "block";
+  setTimeout(()=> msg.style.display="none",2000);
+}
+
+function toggle(el){
+  el.classList.toggle("active");
+}
+</script>
+
+</body>
+</html>
