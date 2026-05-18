@@ -7,6 +7,9 @@ from database.database import engine, Base
 from auth.routes import router as auth_router
 from chat.routes import router as chat_router
 from chat.file_routes import router as file_router
+from ai_module.assistant_routes import router as assistant_router
+from ai_module.summarizer_routes import router as summarizer_router
+from ai_module.scraper_routes import router as scraper_router
 from security.rate_limiter import limiter
 
 Base.metadata.create_all(bind=engine)
@@ -32,6 +35,9 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 app.include_router(chat_router, tags=["Chat"])
 app.include_router(file_router, tags=["Files"])
+app.include_router(assistant_router, prefix="/api/assistant", tags=["AI Assistant"])
+app.include_router(summarizer_router, prefix="/api/summarizer", tags=["AI Summarizer"])
+app.include_router(scraper_router, prefix="/api/scraper", tags=["Web Scraper"])
 
 @app.get("/")
 def home():
