@@ -1475,6 +1475,30 @@ async function openFile(fileId) {
 
 }
 
+    async function openFile(fileId) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(
+          `http://127.0.0.1:9000/library/download/${fileId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to open file');
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      }
+      catch(error) {
+        console.error(error);
+        alert('Unable to open file');
+      }
+    }
+
     function confirmBulkDelete() {
       if (!selectedIds.size) return;
       openConfirm(
