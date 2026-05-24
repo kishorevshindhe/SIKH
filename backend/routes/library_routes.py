@@ -92,6 +92,7 @@ def get_library_files(
             "filename": f.filename,
             "filesize": f.filesize,
             "filetype": f.filetype,
+            "content_text": f.content_text or "",
             "uploaded_at": str(f.created_at)
         }
         for f in files
