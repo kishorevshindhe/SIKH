@@ -2,7 +2,14 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, T
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from database.database import Base
-
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    DateTime,
+    Text
+)
 
 # ── User ──────────────────────────────────────────────────────────────
 class User(Base):
@@ -82,3 +89,21 @@ class PendingFile(Base):
     sender   = relationship("User", foreign_keys=[sender_id])
     receiver = relationship("User", foreign_keys=[receiver_id])
     room     = relationship("Room", foreign_keys=[room_id])
+    # ── Personal Library Files ────────────────────────────────────────────
+class LibraryFile(Base):
+    __tablename__ = "library_files"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    file_id        = Column(String, unique=True, nullable=False)
+    filename       = Column(String, nullable=False)
+    filesize       = Column(Integer, nullable=False)
+    filetype       = Column(String, nullable=False)
+
+    encrypted_data = Column(Text, nullable=False)
+    content_text = Column(Text, nullable=True)
+
+    owner_id       = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    created_at     = Column(DateTime, server_default=func.now())
+
+    owner = relationship("User")

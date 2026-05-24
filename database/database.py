@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# This creates a local SQLite file called sikh.db
+# This creates a local SQLite file called 
 DATABASE_URL = "sqlite:///./sikh.db"
 
 engine = create_engine(
