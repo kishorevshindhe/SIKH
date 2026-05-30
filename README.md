@@ -13,7 +13,6 @@ A web-based collaborative learning platform that integrates AI assistance, intel
 | Member 1 | Backend + Chat + Security | `feature/backend` |
 | Member 2 | AI + Automation | `feature/ai` |
 | Member 3 | Frontend + Search | `feature/frontend` |
-| Member 4 (Claude) | AI Coding Assistant | — |
 
 ---
 
