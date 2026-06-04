@@ -779,13 +779,72 @@
     }
 
     // ── SEND MESSAGE ──
-    function sendAI() {
-      const input = document.getElementById('aiInput');
-      const text  = input.value.trim();
-      if (!text) return;
-      askAI(text);
-      input.value = '';
-    }
+    async function sendAI() {
+  const input = document.getElementById("aiInput");
+  const outputEl = document.getElementById("aiMessages");
+  const question = input?.value.trim();
+
+  if (!question) return;
+
+  outputEl.innerHTML += `
+    <div style="text-align:right;margin-bottom:0.75rem">
+      <span style="background:rgba(168,85,247,0.15);color:#a855f7;padding:0.4rem 0.9rem;border-radius:12px;font-size:0.82rem">
+        ${question}
+      </span>
+    </div>
+    <div id="aiThinking" style="color:#556;font-size:0.82rem;padding:0.5rem 0">
+      ◈ Searching your documents...
+    </div>`;
+
+  input.value = "";
+  outputEl.scrollTop = outputEl.scrollHeight;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/assistant/ask`, {
+      method: "POST",
+      headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ question })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "AI error");
+
+    const formatted = (data.answer || "No answer returned")
+      .replace(/\n\n/g, '</p><p style="margin-top:0.6rem">')
+      .replace(/\n/g, '<br>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    const sourcesHtml = data.sources?.length ? `
+      <div style="margin-top:0.6rem;padding-top:0.5rem;border-top:1px solid rgba(255,255,255,0.07)">
+        <span style="font-size:0.68rem;color:#445">Sources: </span>
+        ${data.sources.map(s => `
+          <span style="font-size:0.68rem;padding:0.1rem 0.4rem;border-radius:20px;
+            background:rgba(168,85,247,0.1);color:#a855f7;
+            border:1px solid rgba(168,85,247,0.2);margin-right:0.3rem">
+            ${s.filename}
+          </span>`).join('')}
+      </div>` : '';
+
+    document.getElementById("aiThinking")?.remove();
+
+    outputEl.innerHTML += `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+        border-left:3px solid #a855f7;border-radius:8px;padding:0.8rem 1rem;
+        font-size:0.82rem;line-height:1.75;color:#c0d0e0;margin-bottom:0.75rem">
+        <p>${formatted}</p>
+        ${sourcesHtml}
+      </div>`;
+
+    outputEl.scrollTop = outputEl.scrollHeight;
+
+  } catch (err) {
+    document.getElementById("aiThinking")?.remove();
+    outputEl.innerHTML += `
+      <div style="color:#ff6b6b;font-size:0.82rem;padding:0.4rem 0">
+        ⚠ ${err.message}
+      </div>`;
+  }
+}
 
     function askAI(text) {
       // Hide suggestions after first message
@@ -884,18 +943,18 @@
         <div class="stat-card c2">
           <div class="stat-icon">🔍</div>
           <div class="stat-val" id="statSearches">142</div>
-          <div class="stat-label">Searches Today</div>
+          <div class="stat-label">Terms Indexed</div>
           <div class="stat-delta up">+18 this hour</div>
         </div>
         <div class="stat-card c3">
           <div class="stat-icon">💬</div>
           <div class="stat-val" id="statMessages">87</div>
-          <div class="stat-label">Messages Sent</div>
+          <div class="stat-label">Content Indexed</div>
           <div class="stat-delta up">+12 today</div>
         </div>
         <div class="stat-card c4">
           <div class="stat-icon">🗄</div>
-          <div class="stat-val">1.8<span style="font-size:16px">GB</span></div>
+          <div class="stat-val" id="statSize">1.8<span style="font-size:16px">GB</span></div>
           <div class="stat-label">Storage Used</div>
           <div class="stat-delta down">72% of 2.5 GB</div>
         </div>
@@ -914,7 +973,9 @@
               <span class="card-title">Search Activity — This Week</span>
               <span class="card-action">View all</span>
             </div>
-            <div class="card-body">
+            <div class="card-body" id="teamStatusList">
+
+    <!-- Member 1: Kishore V — Backend done, phases 2-3-4 complete -->
               <div class="chart-wrap" id="chartWrap">
                 <!-- bars injected by JS -->
               </div>
@@ -938,48 +999,10 @@
               <span class="card-title">Recently Uploaded Files</span>
               <span class="card-action" onclick="location.href='sikh_search_v2.html'">Browse all</span>
             </div>
-            <div class="card-body" style="padding-top:8px;padding-bottom:8px">
-              <div class="file-item">
-                <div class="file-icon-wrap" style="background:var(--mag-soft)">📄</div>
-                <div class="file-info">
-                  <div class="file-name">Machine Learning — Unit 3 Notes</div>
-                  <div class="file-meta"><span>2.1 MB</span><span>Feb 10</span></div>
-                </div>
-                <div class="file-tag pdf">PDF</div>
-              </div>
-              <div class="file-item">
-                <div class="file-icon-wrap" style="background:var(--mag-soft)">📄</div>
-                <div class="file-info">
-                  <div class="file-name">Data Structures & Algorithms — Complete Notes</div>
-                  <div class="file-meta"><span>3.4 MB</span><span>Jan 28</span></div>
-                </div>
-                <div class="file-tag pdf">PDF</div>
-              </div>
-              <div class="file-item">
-                <div class="file-icon-wrap" style="background:var(--amb-soft)">📝</div>
-                <div class="file-info">
-                  <div class="file-name">CN Previous Year Question Paper 2024</div>
-                  <div class="file-meta"><span>0.8 MB</span><span>Jan 15</span></div>
-                </div>
-                <div class="file-tag qpaper">Q.PAPER</div>
-              </div>
-              <div class="file-item">
-                <div class="file-icon-wrap" style="background:var(--grn-soft)">🗒</div>
-                <div class="file-info">
-                  <div class="file-name">Operating Systems — Lecture 7: Memory Management</div>
-                  <div class="file-meta"><span>1.1 MB</span><span>Feb 20</span></div>
-                </div>
-                <div class="file-tag notes">NOTES</div>
-              </div>
-              <div class="file-item">
-                <div class="file-icon-wrap" style="background:var(--mag-soft)">📄</div>
-                <div class="file-info">
-                  <div class="file-name">DBMS — SQL & NoSQL Complete Guide</div>
-                  <div class="file-meta"><span>2.7 MB</span><span>Feb 05</span></div>
-                </div>
-                <div class="file-tag pdf">PDF</div>
-              </div>
-            </div>
+           <div class="card-body" style="padding-top:8px;padding-bottom:8px">
+  <div id="recentFilesList"></div>
+  <div id="typeChart" style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06)"></div>
+</div>
           </div>
 
         </div>
@@ -1049,65 +1072,55 @@
 
         <!-- COL 3: Team + Project Phases -->
         <div style="display:flex;flex-direction:column;gap:16px">
+<!-- Team Status -->
+<div class="card">
+  <div class="card-head">
+    <div class="card-head-icon" style="background:var(--cyan-soft)">👥</div>
+    <span class="card-title">Team Status</span>
+  </div>
+  <div class="card-body" style="padding-top:10px;padding-bottom:10px">
 
-          <!-- Team Status -->
-          <div class="card">
-            <div class="card-head">
-              <div class="card-head-icon" style="background:var(--cyan-soft)">👥</div>
-              <span class="card-title">Team Status</span>
-            </div>
-            <div class="card-body" style="padding-top:10px;padding-bottom:10px">
+    <!-- Member 1: Kishore V — Backend done, phases 2-3-4 complete -->
+    <div class="team-member">
+      <div class="tm-avatar" style="background:linear-gradient(135deg,#00d4ff,#00e87a)">
+        KV
+        <div class="tm-status online"></div>
+      </div>
+      <div class="tm-info">
+        <div class="tm-name" style="color:var(--cyan)">Kishore V</div>
+        <div class="tm-task">File upload &amp; encryption done</div>
+      </div>
+      <div class="tm-badge backend">Backend</div>
+    </div>
 
-              <div class="team-member">
-                <div class="tm-avatar" style="background:linear-gradient(135deg,#00d4ff,#00e87a)">
-                  M1
-                  <div class="tm-status online"></div>
-                </div>
-                <div class="tm-info">
-                  <div class="tm-name" style="color:var(--cyan)">Member1</div>
-                  <div class="tm-task">Setting up WebSocket server</div>
-                </div>
-                <div class="tm-badge backend">Backend</div>
-              </div>
+    <!-- Member 2: Likhith D Girish — AI module in progress -->
+    <div class="team-member">
+      <div class="tm-avatar" style="background:linear-gradient(135deg,#ff3a7a,#ffaa00)">
+        LG
+        <div class="tm-status busy"></div>
+      </div>
+      <div class="tm-info">
+        <div class="tm-name" style="color:var(--magenta)">Likhith D Girish</div>
+        <div class="tm-task">AI integration in progress</div>
+      </div>
+      <div class="tm-badge ai">AI · ML</div>
+    </div>
 
-              <div class="team-member">
-                <div class="tm-avatar" style="background:linear-gradient(135deg,#ff3a7a,#ffaa00)">
-                  M2
-                  <div class="tm-status busy"></div>
-                </div>
-                <div class="tm-info">
-                  <div class="tm-name" style="color:var(--magenta)">Member2</div>
-                  <div class="tm-task">Training question paper model</div>
-                </div>
-                <div class="tm-badge ai">AI · ML</div>
-              </div>
+    <!-- Member 3: Jash Ashish Ladani — Frontend in progress -->
+    <div class="team-member">
+      <div class="tm-avatar" style="background:linear-gradient(135deg,#ffaa00,#ff3a7a)">
+        JL
+        <div class="tm-status online"></div>
+      </div>
+      <div class="tm-info">
+        <div class="tm-name" style="color:var(--amber)">Jash Ashish Ladani</div>
+        <div class="tm-task">Building dashboard UI</div>
+      </div>
+      <div class="tm-badge frontend">Frontend</div>
+    </div>
 
-              <div class="team-member">
-                <div class="tm-avatar" style="background:linear-gradient(135deg,#ffaa00,#ff3a7a)">
-                  M3
-                  <div class="tm-status online"></div>
-                </div>
-                <div class="tm-info">
-                  <div class="tm-name" style="color:var(--amber)">You</div>
-                  <div class="tm-task">Building dashboard UI</div>
-                </div>
-                <div class="tm-badge frontend">Frontend</div>
-              </div>
-
-              <div class="team-member" style="opacity:0.4">
-                <div class="tm-avatar" style="background:var(--surface);color:var(--text-dim)">
-                  M4
-                  <div class="tm-status offline"></div>
-                </div>
-                <div class="tm-info">
-                  <div class="tm-name">Claude</div>
-                  <div class="tm-task">AI Coding Assistant</div>
-                </div>
-                <div class="tm-badge assist">AI</div>
-              </div>
-
-            </div>
-          </div>
+  </div>
+</div>
 
           <!-- Project Phases -->
           <div class="card">
@@ -1316,29 +1329,76 @@ function logout() {
       }).join('');
     }
     renderChart();
-
+    
     // ── ACTIVITY FEED ──
-    const activities = [
-      { avatar:'M1', bg:'linear-gradient(135deg,#00d4ff,#00e87a)', text:`<strong>Member1</strong> pushed to <span class="hl-cyan">feature/backend</span> branch`, icon:'⬆', iconBg:'var(--cyan-soft)', time:'2 min ago' },
-      { avatar:'M3', bg:'linear-gradient(135deg,#ffaa00,#ff3a7a)', text:`<strong>You</strong> uploaded <span class="hl-amber">cn_unit5.pdf</span> to the knowledge base`, icon:'📄', iconBg:'var(--amb-soft)', time:'14 min ago' },
-      { avatar:'M2', bg:'linear-gradient(135deg,#ff3a7a,#ffaa00)', text:`<strong>Member2</strong> completed <span class="hl-magenta">question paper analysis</span> module`, icon:'✓', iconBg:'var(--grn-soft)', time:'31 min ago' },
-      { avatar:'M1', bg:'linear-gradient(135deg,#00d4ff,#00e87a)', text:`<strong>Member1</strong> created room <span class="hl-cyan">cs-final-year</span>`, icon:'🔒', iconBg:'var(--cyan-soft)', time:'1 hr ago' },
-      { avatar:'M3', bg:'linear-gradient(135deg,#ffaa00,#ff3a7a)', text:`<strong>You</strong> searched for <span class="hl-amber">"machine learning"</span> — 3 results`, icon:'🔍', iconBg:'var(--amb-soft)', time:'2 hr ago' },
-      { avatar:'M2', bg:'linear-gradient(135deg,#ff3a7a,#ffaa00)', text:`<strong>Member2</strong> sent a file in <span class="hl-magenta">#general</span>`, icon:'📎', iconBg:'var(--mag-soft)', time:'3 hr ago' },
-    ];
+let activities = []; // starts empty, filled by API
 
-    function renderActivity() {
-      document.getElementById('activityFeed').innerHTML = activities.map((a,i) => `
-        <div class="activity-item" style="animation-delay:${i*0.06}s">
-          <div class="act-avatar" style="background:${a.bg}">${a.avatar}</div>
-          <div class="act-content">
-            <div class="act-text">${a.text}</div>
-            <div class="act-time">${a.time}</div>
-          </div>
-          <div class="act-icon" style="background:${a.iconBg}">${a.icon}</div>
-        </div>`).join('');
-    }
+const MEMBER_STYLES = {
+  'kishore': { avatar: 'KV', bg: 'linear-gradient(135deg,#00d4ff,#00e87a)', nameColor: 'var(--cyan)' },
+  'likhith': { avatar: 'LG', bg: 'linear-gradient(135deg,#ff3a7a,#ffaa00)', nameColor: 'var(--magenta)' },
+  'jash':    { avatar: 'JL', bg: 'linear-gradient(135deg,#ffaa00,#ff3a7a)', nameColor: 'var(--amber)' },
+};
+
+function getStyle(username) {
+  const key = Object.keys(MEMBER_STYLES).find(k => username?.toLowerCase().includes(k));
+  return MEMBER_STYLES[key] || { avatar: username?.slice(0,2).toUpperCase() || '??', bg: 'var(--surface)', nameColor: 'var(--text)' };
+}
+
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60)         return `${diff}s ago`;
+  if (diff < 3600)       return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400)      return `${Math.floor(diff / 3600)} hr ago`;
+  return                 `${Math.floor(diff / 86400)} day ago`;
+}
+
+function buildActivities(files) {
+  return files.map(f => {
+    const style = getStyle(f.uploaded_by || f.sender || f.username);
+    const name  = f.uploaded_by || f.sender || f.username || 'Someone';
+    return {
+      avatar:  style.avatar,
+      bg:      style.bg,
+      text:    `<strong style="color:${style.nameColor}">${name}</strong> uploaded <span class="hl-amber">${f.filename || f.file_name}</span>`,
+      icon:    '📄',
+      iconBg:  'var(--amb-soft)',
+      time:    timeAgo(f.uploaded_at || f.created_at || f.timestamp),
+    };
+  });
+}
+
+async function loadActivity() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    renderActivity(); // renders empty gracefully
+    return;
+  }
+  try {
+    const res = await fetch('http://localhost:9000/files/pending', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    activities = buildActivities(Array.isArray(data) ? data : data.files || []);
     renderActivity();
+  } catch (err) {
+    console.error('Activity feed error:', err);
+    // show a gentle error state in the feed instead of crashing
+    document.getElementById('activityFeed').innerHTML =
+      `<div style="color:var(--text-dim);font-size:13px;padding:12px 0">Could not load activity. Is the backend running?</div>`;
+  }
+}
+
+async function refreshActivity() {
+  const feed = document.getElementById('activityFeed');
+  feed.style.opacity = '0.4';
+  await loadActivity();
+  feed.style.opacity = '1';
+  showToast('✓', 'Activity feed refreshed');
+}
+
+// call this on page load instead of renderActivity() directly
+loadActivity();
 
     function refreshActivity() {
       // Shuffle and re-render to simulate a refresh
@@ -1368,11 +1428,62 @@ function logout() {
       }, 16);
     }
     setTimeout(() => {
-      animateCounter(document.getElementById('statDocs'),     24);
-      animateCounter(document.getElementById('statSearches'), 142);
-      animateCounter(document.getElementById('statMessages'), 87);
-    }, 200);
+  loadDashboardStats();
+}, 200);
 
+    const API_BASE = "http://127.0.0.1:9000";
+
+function authHeaders() {
+  return { "Authorization": `Bearer ${localStorage.getItem("token")}` };
+}
+
+function formatSize(bytes) {
+  if (!bytes) return "0 B";
+  if (bytes < 1024*1024) return `${(bytes/1024).toFixed(1)} KB`;
+  if (bytes < 1024**3) return `${(bytes/(1024*1024)).toFixed(1)} MB`;
+  return `${(bytes/(1024**3)).toFixed(2)} GB`;
+}
+
+function setEl(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+async function loadDashboardStats() {
+  try {
+    const res = await fetch(`${API_BASE}/dashboard/stats`, { headers: authHeaders() });
+    if (!res.ok) throw new Error("Stats fetch failed");
+    const d = await res.json();
+
+    setEl("statDocs",     d.total_files);
+    setEl("statSize",     formatSize(d.total_size_bytes));
+    setEl("statSearches", (d.total_terms_indexed || 0).toLocaleString());
+    setEl("statMessages", (d.total_content_chars || 0).toLocaleString());
+// Real deltas
+const docsToday = document.querySelector(".stat-card.c1 .stat-delta");
+const sizeToday = document.querySelector(".stat-card.c4 .stat-delta");
+if (docsToday) docsToday.textContent = `+${d.files_today} today`;
+if (sizeToday) sizeToday.textContent = `+${d.size_today_kb} KB today`;
+
+// Activity feed
+renderActivity(d.activity);
+
+// Team status
+renderTeamStatus(d.team);
+    renderRecentFiles(d.recent_files);
+    renderTypeChart(d.file_types);
+    renderWeeklyChart(d.weekly_uploads);
+
+  } catch (err) {
+    console.error("Dashboard stats error:", err);
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", loadDashboardStats);
+} else {
+  loadDashboardStats();
+}
     // ── TOAST ──
     let toastTimer;
     function showToast(icon, text) {
@@ -1383,6 +1494,138 @@ function logout() {
       t.classList.add('show');
       toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
     }
+    function renderActivity(activity) {
+  const container = document.getElementById("activityFeed");
+  if (!container || !activity) return;
+  container.innerHTML = activity.map(a => `
+    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,200,255,0.15);
+        color:#00c8ff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;
+        font-weight:700;flex-shrink:0">
+        ${a.username.substring(0,2).toUpperCase()}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.8rem;color:#c0d0e0">
+          <strong style="color:#00c8ff">${a.username}</strong> ${a.action}
+        </div>
+        <div style="font-size:0.68rem;color:#445;margin-top:2px">${a.time}</div>
+      </div>
+      <span style="font-size:1rem">📄</span>
+    </div>
+  `).join('');
+}
+
+function renderTeamStatus(team) {
+  const container = document.querySelector(".team-status-list") || document.getElementById("teamStatus");
+  if (!container || !team) return;
+  const colors = ["#00c8ff","#ff6b9d","#00ffc8","#a855f7","#ffe066"];
+  container.innerHTML = team.map((u, i) => `
+    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <div style="width:32px;height:32px;border-radius:50%;background:${colors[i % colors.length]}22;
+        color:${colors[i % colors.length]};display:flex;align-items:center;justify-content:center;
+        font-size:0.75rem;font-weight:700;border:1px solid ${colors[i % colors.length]}44;flex-shrink:0">
+        ${u.username.substring(0,2).toUpperCase()}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:0.82rem;color:#e0e0e0;font-weight:${u.is_you ? '700' : '400'}">
+          ${u.username} ${u.is_you ? '<span style="color:#00ffc8;font-size:0.68rem">(you)</span>' : ''}
+        </div>
+        <div style="font-size:0.68rem;color:#445">${u.files_count} files uploaded</div>
+      </div>
+      <div style="width:8px;height:8px;border-radius:50%;background:#00ffc8"></div>
+    </div>
+  `).join('');
+}
+    function renderRecentFiles(files) {
+  const container = document.getElementById("recentFilesList");
+  if (!container || !files) return;
+
+  const icons = { pdf: "📕", docx: "📘", txt: "📃" };
+
+  container.innerHTML = files.map(f => `
+    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <span style="font-size:1.2rem">${icons[f.filetype?.toLowerCase()] || '📄'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.82rem;color:#e0e0e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          ${f.filename}
+        </div>
+        <div style="font-size:0.68rem;color:#556;margin-top:2px">
+          ${formatSize(f.filesize)} · ${f.uploaded_at || ''}
+        </div>
+      </div>
+      <span style="font-size:0.65rem;padding:0.15rem 0.45rem;border-radius:20px;background:rgba(0,200,255,0.1);color:#00c8ff;border:1px solid rgba(0,200,255,0.2);text-transform:uppercase">
+        ${f.filetype || 'doc'}
+      </span>
+    </div>
+  `).join('');
+}
+
+function renderTypeChart(typeData) {
+  const canvas = document.getElementById("typeChart");
+  if (!canvas) return;
+
+  const colors = { pdf: "#ff6b6b", docx: "#4ecdc4", txt: "#ffe66d", other: "#a29bfe" };
+  const total = Object.values(typeData).reduce((a,b)=>a+b, 0);
+  if (total === 0) return;
+
+  const size = 120, cx = 60, cy = 60, r = 45, innerR = 28;
+  let startAngle = -Math.PI/2;
+  let paths = '', legend = '';
+
+  Object.entries(typeData).forEach(([type, count]) => {
+    const angle = (count/total) * Math.PI * 2;
+    const endAngle = startAngle + angle;
+    const x1 = cx + r * Math.cos(startAngle);
+    const y1 = cy + r * Math.sin(startAngle);
+    const x2 = cx + r * Math.cos(endAngle);
+    const y2 = cy + r * Math.sin(endAngle);
+    const ix1 = cx + innerR * Math.cos(startAngle);
+    const iy1 = cy + innerR * Math.sin(startAngle);
+    const ix2 = cx + innerR * Math.cos(endAngle);
+    const iy2 = cy + innerR * Math.sin(endAngle);
+    const large = angle > Math.PI ? 1 : 0;
+    const color = colors[type] || "#888";
+    paths += `<path d="M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} L${ix2},${iy2} A${innerR},${innerR} 0 ${large},0 ${ix1},${iy1} Z" fill="${color}" opacity="0.85"/>`;
+    legend += `<div style="display:flex;align-items:center;gap:6px;font-size:0.7rem;color:#aaa">
+      <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block"></span>
+      ${type.toUpperCase()} (${count})</div>`;
+    startAngle = endAngle;
+  });
+
+  paths += `<text x="${cx}" y="${cy+4}" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">${total}</text>
+            <text x="${cx}" y="${cy+16}" text-anchor="middle" fill="#556" font-size="7">FILES</text>`;
+
+  canvas.innerHTML = `
+    <div style="display:flex;align-items:center;gap:1rem">
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${paths}</svg>
+      <div style="display:flex;flex-direction:column;gap:4px">${legend}</div>
+    </div>`;
+}
+
+function renderWeeklyChart(weeklyData) {
+  const container = document.getElementById("chartWrap");
+  if (!container) return;
+
+  const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  const values = days.map(d => weeklyData[d] || 0);
+  const max = Math.max(...values, 1);
+
+  const bars = days.map((day, i) => {
+    const pct = (values[i] / max) * 100;
+    const hasData = values[i] > 0;
+    return `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1">
+        <span style="font-size:0.65rem;color:${hasData?'#00ffc8':'#333'}">${values[i]||''}</span>
+        <div style="width:100%;background:rgba(255,255,255,0.05);border-radius:4px;height:80px;display:flex;align-items:flex-end">
+          <div style="width:100%;background:${hasData?'linear-gradient(to top,#00ffc8,#00c8ff)':'transparent'};
+            border-radius:4px;height:${Math.max(pct,hasData?8:0)}%;transition:height 0.4s"></div>
+        </div>
+        <span style="font-size:0.65rem;color:#445">${day}</span>
+      </div>`;
+  }).join('');
+
+  container.innerHTML = `<div style="display:flex;gap:4px;align-items:flex-end;height:110px;padding:0.5rem 0">${bars}</div>`;
+}
   </script>
 </body>
 </html>

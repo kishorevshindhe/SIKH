@@ -1,19 +1,37 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+
 from database.database import engine, Base
+
 from auth.routes import router as auth_router
+
 from backend.routes.library_routes import router as library_router
+from backend.routes.dashboard_routes import router as dashboard_router
 from chat.routes import router as chat_router
 from chat.file_routes import router as file_router
+
 from ai_module.assistant_routes import router as assistant_router
 from ai_module.summarizer_routes import router as summarizer_router
 from ai_module.scraper_routes import router as scraper_router
+
 from security.rate_limiter import limiter
-from backend.routes.library_routes import router as library_router
+from dotenv import load_dotenv
+load_dotenv()
+
+# ─────────────────────────────────────────────
+# CREATE DATABASE TABLES
+# ─────────────────────────────────────────────
+
 Base.metadata.create_all(bind=engine)
+
+
+# ─────────────────────────────────────────────
+# FASTAPI APP
+# ─────────────────────────────────────────────
 
 app = FastAPI(
     title="SIKH API",
@@ -21,31 +39,101 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Attach rate limiter to app
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# ─────────────────────────────────────────────
+# CORS
+# ─────────────────────────────────────────────
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
-app.include_router(chat_router, tags=["Chat"])
-app.include_router(file_router, tags=["Files"])
-app.include_router(library_router)
-app.include_router(assistant_router, prefix="/api/assistant", tags=["AI Assistant"])
-app.include_router(summarizer_router, prefix="/api/summarizer", tags=["AI Summarizer"])
-app.include_router(scraper_router, prefix="/api/scraper", tags=["Web Scraper"])
-app.include_router(library_router, tags=["Library"])
+
+# ─────────────────────────────────────────────
+# RATE LIMITER
+# ─────────────────────────────────────────────
+
+app.state.limiter = limiter
+
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
+)
+
+
+# ─────────────────────────────────────────────
+# ROUTERS
+# ─────────────────────────────────────────────
+
+app.include_router(
+    auth_router,
+    prefix="/auth",
+    tags=["Authentication"]
+)
+
+app.include_router(
+    chat_router,
+    tags=["Chat"]
+)
+
+app.include_router(
+    file_router,
+    tags=["Files"]
+)
+
+app.include_router(
+    library_router,
+    tags=["Library"]
+)
+
+app.include_router(
+    assistant_router,
+    prefix="/api/assistant",
+    tags=["AI Assistant"]
+)
+
+app.include_router(
+    summarizer_router,
+    prefix="/api/summarizer",
+    tags=["AI Summarizer"]
+)
+
+app.include_router(
+    scraper_router,
+    prefix="/api/scraper",
+    tags=["Web Scraper"]
+)
+
+app.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard"])
+# ─────────────────────────────────────────────
+# ROOT ROUTE
+# ─────────────────────────────────────────────
+
 @app.get("/")
 def home():
-    return {"message": "SIKH Backend is running!"}
+    return {
+        "message": "SIKH Backend is running!"
+    }
+
+
+# ─────────────────────────────────────────────
+# TEST CHAT PAGE
+# ─────────────────────────────────────────────
 
 @app.get("/test-chat", response_class=HTMLResponse)
 def test_chat():
-    with open("test_chat.html", "r", encoding="utf-8") as f:
+
+    with open(
+        "test_chat.html",
+        "r",
+        encoding="utf-8"
+    ) as f:
+
         return f.read()

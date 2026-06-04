@@ -2,6 +2,8 @@ import io
 import uuid
 import base64
 import PyPDF2
+import re
+from typing import List
 from docx import Document
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
@@ -143,3 +145,141 @@ def delete_library_file(
     db.delete(file)
     db.commit()
     return {"message": "File deleted successfully"}
+## ADD THIS TO: backend/routes/library_routes.py
+## Place this after your existing routes
+
+import re
+from typing import List, Optional
+
+# ─────────────────────────────────────────
+# HELPER: Extract matching chunks from text
+# ─────────────────────────────────────────
+
+def extract_matching_chunks(content_text: str, query: str, context_words: int = 60, max_chunks: int = 5) -> List[dict]:
+    """
+    Splits content_text into paragraphs/sentences,
+    finds all chunks matching the query,
+    returns them with highlighted context.
+    """
+    if not content_text or not query:
+        return []
+
+    query_lower = query.lower()
+    query_terms = [t.strip() for t in query_lower.split() if len(t.strip()) > 2]
+
+    # Split into paragraphs first, then fallback to sentences
+    paragraphs = [p.strip() for p in re.split(r'\n{2,}|\r\n{2,}', content_text) if p.strip()]
+    
+    # If no paragraph breaks, split into sentences
+    if len(paragraphs) <= 1:
+        paragraphs = [s.strip() for s in re.split(r'(?<=[.!?])\s+', content_text) if s.strip()]
+
+    # Further split very long paragraphs into ~60 word chunks
+    final_chunks = []
+    for para in paragraphs:
+        words = para.split()
+        if len(words) > context_words * 2:
+            for i in range(0, len(words), context_words):
+                chunk = ' '.join(words[i:i + context_words])
+                if chunk:
+                    final_chunks.append(chunk)
+        else:
+            final_chunks.append(para)
+
+    # Score each chunk: how many query terms appear?
+    scored_chunks = []
+    for chunk in final_chunks:
+        chunk_lower = chunk.lower()
+        score = sum(1 for term in query_terms if term in chunk_lower)
+        if score > 0:
+            scored_chunks.append((score, chunk))
+
+    # Sort by score descending, take top N
+    scored_chunks.sort(key=lambda x: x[0], reverse=True)
+    top_chunks = scored_chunks[:max_chunks]
+
+    results = []
+    for score, chunk in top_chunks:
+        # Build highlighted version — wrap matched terms in <mark> tags
+        highlighted = chunk
+        for term in sorted(query_terms, key=len, reverse=True):  # longest first to avoid double-wrapping
+            pattern = re.compile(re.escape(term), re.IGNORECASE)
+            highlighted = pattern.sub(lambda m: f'<mark>{m.group()}</mark>', highlighted)
+        
+        results.append({
+            "text": chunk,
+            "highlighted": highlighted,
+            "score": score,
+            "word_count": len(chunk.split())
+        })
+
+    return results
+
+
+# ─────────────────────────────────────────
+# SEARCH ROUTE
+# ─────────────────────────────────────────
+
+@router.get("/library/search")
+def search_library(
+    q: str,
+    limit: int = 10,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    """
+    Search inside uploaded documents.
+    Returns matching files with multiple content chunks per file,
+    each chunk containing the relevant paragraph with highlighted terms.
+    
+    Example: GET /library/search?q=deadlock&limit=10
+    """
+    if not q or len(q.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Query too short")
+
+    query_str = q.strip()
+
+    # Find files whose content_text contains the query
+    matching_files = db.query(LibraryFile).filter(
+        LibraryFile.owner_id == current_user.id,
+        LibraryFile.content_text.ilike(f"%{query_str}%")
+    ).all()
+
+    if not matching_files:
+        return {
+            "query": query_str,
+            "total_files": 0,
+            "results": []
+        }
+
+    results = []
+
+    for file in matching_files:
+        chunks = extract_matching_chunks(
+            content_text=file.content_text,
+            query=query_str,
+            context_words=60,
+            max_chunks=5  # max 5 chunks per file
+        )
+
+        if not chunks:
+            continue
+
+        results.append({
+            "file_id": file.id,
+            "filename": file.filename,
+            "filetype": file.filetype,
+            "uploaded_at": str(file.uploaded_at)[:10] if file.uploaded_at else None,
+            "filesize": file.filesize,
+            "total_chunks_found": len(chunks),
+            "chunks": chunks  # list of {text, highlighted, score, word_count}
+        })
+
+    # Sort files by their best chunk score
+    results.sort(key=lambda x: x["chunks"][0]["score"] if x["chunks"] else 0, reverse=True)
+
+    return {
+        "query": query_str,
+        "total_files": len(results),
+        "results": results
+    }

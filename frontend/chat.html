@@ -164,20 +164,20 @@
       box-shadow: 0 0 6px var(--green);
     }
 
-    .user-pill {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--surface); border: 1px solid var(--border2);
-      border-radius: 999px; padding: 4px 12px 4px 4px;
-      cursor: pointer; transition: border-color 0.2s;
+     .user-pill {
+      display:flex; align-items:center; gap:8px;
+      background:var(--surface); border:1px solid var(--border2);
+      border-radius:999px; padding:4px 12px 4px 4px;
+      cursor:pointer; transition:border-color .2s;
     }
-    .user-pill:hover { border-color: var(--cyan); }
+    .user-pill:hover { border-color:var(--cyan); }
     .user-avatar {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--cyan), var(--magenta));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; color: #000;
+      width:28px; height:28px; border-radius:50%;
+      background:linear-gradient(135deg,var(--cyan),var(--magenta));
+      display:flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:700; color:#000;
     }
-    .user-name { font-size: 12px; font-weight: 600; letter-spacing: 0.03em; }
+    .user-name { font-size:12px; font-weight:600; letter-spacing:0.03em; }
 
     /* ════════════════════════════════
        MAIN 3-COLUMN LAYOUT
@@ -705,7 +705,7 @@
       <div class="nav-stat" style="border-left:1px solid var(--border2);padding-left:12px">
         <span>AES-256</span>
       </div>
-      <div class="user-pill">
+      <div class="user-pill" onclick="location.href='profile.html'">
         <div class="user-avatar">M3</div>
         <span class="user-name">Member3</span>
       </div>
@@ -742,6 +742,41 @@
   </div>
 
   <script>
+    async function loadUserProfile() {
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  try {
+    const response = await fetch('http://127.0.0.1:9000/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Unauthorized');
+    }
+
+    const user = await response.json();
+  document.querySelector('.user-name').textContent = user.username;
+
+    const initials = user.username.substring(0,2).toUpperCase();
+
+    document.querySelector('.user-avatar').textContent = initials;
+
+  } catch (error) {
+    console.error(error);
+
+    localStorage.removeItem('token');
+
+    window.location.href = 'login.html';
+  }
+}
+    loadUserProfile();
     function toggleAI() {
       const p = document.getElementById('aiPanel');
       const b = document.getElementById('aiBtn');

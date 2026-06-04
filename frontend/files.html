@@ -636,7 +636,7 @@
       <div class="nav-stat" style="border-left:1px solid var(--border2);padding-left:12px">
         <span id="fileCountNav" style="color:var(--text-mid)">0 files</span>
       </div>
-      <div class="user-pill">
+      <div class="user-pill" onclick="location.href='profile.html'">
         <div class="user-avatar">M3</div>
         <span class="user-name">Member3</span>
       </div>
@@ -963,13 +963,14 @@ let nextId = 1;
 
       if (uploadQueue.length === 0) {
         list.innerHTML = '';
-        list.appendChild(empty);
-        empty.style.display = 'block';
+const emptyClone = empty.cloneNode(true);
+emptyClone.style.display = 'block';
+list.appendChild(emptyClone);
         btn.disabled = true;
         return;
       }
 
-      empty.style.display = 'none';
+      if (empty) empty.style.display = 'none';
       list.innerHTML = uploadQueue.map(item => `
         <div class="queue-item" id="qi-${item.id}">
           <div class="q-icon" style="background:${typeBg[guessType(item.file.name)]}">${typeIcon[guessType(item.file.name)]}</div>

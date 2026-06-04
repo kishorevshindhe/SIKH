@@ -7,6 +7,110 @@
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 
   <style>
+    .sikh-results-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+.sikh-file-result {
+  border: 1px solid rgba(0, 255, 200, 0.15);
+  border-radius: 12px;
+  background: rgba(10, 15, 25, 0.85);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.sikh-file-result:hover { border-color: rgba(0, 255, 200, 0.4); }
+.sikh-file-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.2rem;
+  background: rgba(0, 255, 200, 0.04);
+  border-bottom: 1px solid rgba(0, 255, 200, 0.08);
+  cursor: pointer;
+  user-select: none;
+}
+.sikh-file-icon { font-size: 1.3rem; flex-shrink: 0; }
+.sikh-file-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #00ffc8;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sikh-file-meta { display: flex; gap: 0.6rem; align-items: center; flex-shrink: 0; }
+.sikh-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+.sikh-badge-type { background: rgba(0,200,255,0.12); color: #00c8ff; border: 1px solid rgba(0,200,255,0.25); }
+.sikh-badge-chunks { background: rgba(0,255,150,0.1); color: #00ff96; border: 1px solid rgba(0,255,150,0.2); }
+.sikh-badge-date { background: rgba(255,255,255,0.04); color: #888; border: 1px solid rgba(255,255,255,0.08); }
+.sikh-collapse-icon { color: #444; font-size: 0.8rem; transition: transform 0.25s; flex-shrink: 0; }
+.sikh-file-result.collapsed .sikh-collapse-icon { transform: rotate(-90deg); }
+.sikh-chunks { padding: 0.75rem 1.2rem 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+.sikh-file-result.collapsed .sikh-chunks { display: none; }
+.sikh-chunk {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-left: 3px solid rgba(0,255,200,0.35);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: #b0c0d0;
+  transition: border-left-color 0.2s, background 0.2s;
+}
+.sikh-chunk:hover { background: rgba(0,255,200,0.04); border-left-color: #00ffc8; }
+.sikh-chunk mark {
+  background: transparent;
+  color: #ffe066;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgba(255,224,102,0.4);
+  text-underline-offset: 2px;
+}
+.sikh-chunk-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.6rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.sikh-chunk-words { font-size: 0.68rem; color: #444; }
+.sikh-chunk-score { font-size: 0.68rem; color: #00ffc8; opacity: 0.6; }
+.sikh-open-file-btn {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid rgba(0,255,200,0.3);
+  background: transparent;
+  color: #00ffc8;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sikh-open-file-btn:hover { background: rgba(0,255,200,0.1); }
+.sikh-no-results { text-align: center; padding: 3rem 1rem; color: #444; font-size: 0.9rem; }
+.sikh-no-results .sikh-no-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+.sikh-search-stats {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #556;
+  margin-bottom: 0.5rem;
+  padding: 0 0.2rem;
+  flex-wrap: wrap;
+}
+.sikh-stat-val { color: #00ffc8; font-weight: 700; }
     :root {
       --bg:        #080c10;
       --deep:      #0c1118;
@@ -193,22 +297,20 @@
     }
 
     .user-pill {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 999px;
-      padding: 4px 12px 4px 4px;
-      cursor: pointer;
-      transition: border-color 0.2s;
+      display:flex; align-items:center; gap:8px;
+      background:var(--surface); border:1px solid var(--border2);
+      border-radius:999px; padding:4px 12px 4px 4px;
+      cursor:pointer; transition:border-color .2s;
     }
-    .user-pill:hover { border-color: var(--cyan); }
-
+    .user-pill:hover { border-color:var(--cyan); }
     .user-avatar {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--cyan), var(--magenta));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; color: #000;
+      width:28px; height:28px; border-radius:50%;
+      background:linear-gradient(135deg,var(--cyan),var(--magenta));
+      display:flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:700; color:#000;
     }
+    .user-name { font-size:12px; font-weight:600; letter-spacing:0.03em; }
+    
 
     .user-name {
       font-size: 12px; font-weight: 600;
@@ -770,7 +872,7 @@
       <div class="nav-stat" style="border-left:1px solid var(--border2); padding-left:12px">
         <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-mid)" id="docCountNav">24 docs</span>
       </div>
-      <div class="user-pill">
+      <div class="user-pill" onclick="location.href='profile.html'">
         <div class="user-avatar">M3</div>
         <span class="user-name">Member3</span>
       </div>
@@ -806,6 +908,158 @@
     </div>
   </div>
   <script>
+    // Real doc count in navbar
+async function loadDocCount() {
+  try {
+    const res = await fetch("http://127.0.0.1:9000/dashboard/stats", {
+      headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+    });
+    const d = await res.json();
+    const el = document.getElementById("docCountNav");
+    if (el) el.textContent = d.total_files + " docs";
+  } catch (e) {
+    console.error("Doc count error:", e);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadDocCount);
+    async function loadUserProfile() {
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  try {
+    const response = await fetch('http://127.0.0.1:9000/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Unauthorized');
+    }
+
+    const user = await response.json();
+  document.querySelector('.user-name').textContent = user.username;
+
+    const initials = user.username.substring(0,2).toUpperCase();
+
+    document.querySelector('.user-avatar').textContent = initials;
+
+  } catch (error) {
+    console.error(error);
+
+    localStorage.removeItem('token');
+
+    window.location.href = 'login.html';
+  }
+}
+loadUserProfile();
+
+async function performSearch() {
+  const query = document.getElementById("aiInput").value.trim();
+  const resultsContainer = document.getElementById("resultsList");
+  if (!query) return;
+
+  resultsContainer.innerHTML = `
+    <div class="sikh-no-results">
+      <span class="sikh-no-icon">⟳</span>
+      Scanning knowledge base...
+    </div>`;
+
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(
+      `${API_BASE}/library/search?q=${encodeURIComponent(query)}&limit=15`,
+      { headers: { "Authorization": `Bearer ${token}` } }
+    );
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.detail || "Search failed");
+    }
+    const data = await response.json();
+    renderSearchResults(data, query);
+  } catch (err) {
+    resultsContainer.innerHTML = `
+      <div class="sikh-no-results">
+        <span class="sikh-no-icon">⚠</span>
+        ${err.message || "Search error"}
+      </div>`;
+  }
+}
+
+function renderSearchResults(data, query) {
+  const container = document.getElementById("searchResults");
+  if (!data.results || data.results.length === 0) {
+    container.innerHTML = `
+      <div class="sikh-no-results">
+        <span class="sikh-no-icon">◈</span>
+        No matches for <strong style="color:#00ffc8">"${escapeHtml(query)}"</strong>
+      </div>`;
+    return;
+  }
+
+  const totalChunks = data.results.reduce((s, r) => s + r.total_chunks_found, 0);
+  let html = `
+    <div class="sikh-search-stats">
+      <span>Files: <span class="sikh-stat-val">${data.total_files}</span></span>
+      <span>·</span>
+      <span>Passages: <span class="sikh-stat-val">${totalChunks}</span></span>
+      <span>·</span>
+      <span>Query: <span class="sikh-stat-val">"${escapeHtml(query)}"</span></span>
+    </div>
+    <div class="sikh-results-wrapper">`;
+
+  data.results.forEach((file, i) => {
+    const icon = file.filetype === 'pdf' ? '📕' : file.filetype === 'docx' ? '📘' : '📄';
+    html += `
+      <div class="sikh-file-result" id="fr${i}">
+        <div class="sikh-file-header" onclick="toggleFile(${i})">
+          <span class="sikh-file-icon">${icon}</span>
+          <span class="sikh-file-name">${escapeHtml(file.filename)}</span>
+          <div class="sikh-file-meta">
+            <span class="sikh-badge sikh-badge-type">${file.filetype || 'doc'}</span>
+            <span class="sikh-badge sikh-badge-chunks">${file.total_chunks_found} passages</span>
+            ${file.uploaded_at ? `<span class="sikh-badge sikh-badge-date">${file.uploaded_at}</span>` : ''}
+          </div>
+          <span class="sikh-collapse-icon">▾</span>
+        </div>
+        <div class="sikh-chunks">
+          ${file.chunks.map(chunk => `
+            <div class="sikh-chunk">
+              <div>${chunk.highlighted}</div>
+              <div class="sikh-chunk-footer">
+                <span class="sikh-chunk-words">${chunk.word_count} words</span>
+                <span class="sikh-chunk-score">relevance: ${chunk.score}</span>
+                <button class="sikh-open-file-btn" onclick="window.open('${API_BASE}/library/download/${file.file_id}','_blank')">
+                  Open file ↗
+                </button>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function toggleFile(i) {
+  document.getElementById(`fr${i}`).classList.toggle("collapsed");
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("aiInput");
+  if (input) input.addEventListener("keydown", e => { if (e.key === "Enter") performSearch(); });
+});
     function toggleAI(){const p=document.getElementById('aiPanel'),b=document.getElementById('aiBtn'),o=p.style.display==='flex';p.style.display=o?'none':'flex';b.style.background=o?'':'rgba(168,85,247,0.1)';}
     function sendAI(){const i=document.getElementById('aiInput');if(i.value.trim()){askAI(i.value.trim());i.value='';}}
     function askAI(text){document.getElementById('aiSuggestions').style.display='none';const msgs=document.getElementById('aiMessages');msgs.innerHTML+=`<div style="display:flex;gap:8px;flex-direction:row-reverse"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#ff3a7a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;flex-shrink:0">M3</div><div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);border-radius:12px 4px 12px 12px;padding:9px 12px;font-size:12.5px;line-height:1.6;max-width:85%">${text.replace(/</g,'&lt;')}</div></div>`;const tid='t'+Date.now();msgs.innerHTML+=`<div id="${tid}" style="display:flex;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div><div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;color:var(--text-dim)">···</div></div>`;msgs.scrollTop=msgs.scrollHeight;const r={'summarize':'Connect the backend to get full PDF summaries! 📄','tfidf':'TF-IDF = Term Frequency × Inverse Document Frequency. Rare important words score higher! 📊','topics':'Focus on: Data Structures, Networking (TCP/IP), ML fundamentals. 🎯'};const k=text.toLowerCase();const m=Object.entries(r).find(([key])=>k.includes(key));setTimeout(()=>{const el=document.getElementById(tid);if(el)el.outerHTML=`<div style="display:flex;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div><div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;line-height:1.6;color:var(--text-mid);max-width:85%">${m?m[1]:'I received: "'+text+'". Connect the OpenAI backend for full answers! 🤖'}</div></div>`;msgs.scrollTop=msgs.scrollHeight;},1400);}
