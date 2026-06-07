@@ -1195,10 +1195,10 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="ip-section">
         <div class="ip-label">Index Stats</div>
         <div class="idx-grid">
-          <div class="idx-box"><span class="idx-val">24</span><span class="idx-name">DOCS</span></div>
-          <div class="idx-box"><span class="idx-val">1.2k</span><span class="idx-name">TERMS</span></div>
-          <div class="idx-box"><span class="idx-val">8.4k</span><span class="idx-name">TOKENS</span></div>
-          <div class="idx-box"><span class="idx-val">99%</span><span class="idx-name">INDEXED</span></div>
+         <div class="idx-box"><span class="idx-val" id="idxDocs">24</span><span class="idx-name">DOCS</span></div>
+<div class="idx-box"><span class="idx-val" id="idxTerms">1.2k</span><span class="idx-name">TERMS</span></div>
+<div class="idx-box"><span class="idx-val" id="idxTokens">8.4k</span><span class="idx-name">TOKENS</span></div>
+<div class="idx-box"><span class="idx-val" id="idxPct">99%</span><span class="idx-name">INDEXED</span></div>
         </div>
       </div>
 
@@ -1228,7 +1228,48 @@ document.addEventListener("DOMContentLoaded", () => {
        TF-IDF SEARCH ENGINE
   ════════════════════════════════════════ -->
   <script>
+async function loadSidebarStats() {
+  try {
+    const res = await fetch("http://127.0.0.1:9000/dashboard/stats", {
+      headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+    });
+    const d = await res.json();
 
+    // Total files count
+    const allCount = document.querySelector(".filter-item .fi-count");
+    if (allCount) allCount.textContent = d.total_files;
+
+    // Per type counts
+    const pdf   = d.file_types?.pdf   || 0;
+    const docx  = d.file_types?.docx  || 0;
+    const txt   = d.file_types?.txt   || 0;
+    const other = d.file_types?.other || 0;
+
+    const counts = document.querySelectorAll(".filter-item .fi-count");
+    if (counts[0]) counts[0].textContent = d.total_files;  // All
+    if (counts[1]) counts[1].textContent = pdf;             // PDF
+    if (counts[2]) counts[2].textContent = 0;               // Web (not implemented)
+    if (counts[3]) counts[3].textContent = 0;               // Q.Papers
+    if (counts[4]) counts[4].textContent = docx + txt;      // Notes/Docs
+
+    // Doc count in navbar
+    const navDoc = document.getElementById("docCountNav");
+    if (navDoc) navDoc.textContent = d.total_files + " docs";
+// Index stats panel
+document.getElementById("idxDocs").textContent  = d.total_files;
+document.getElementById("idxTerms").textContent = d.total_terms_indexed > 999
+  ? (d.total_terms_indexed/1000).toFixed(1)+"k"
+  : d.total_terms_indexed;
+document.getElementById("idxTokens").textContent = d.total_content_chars > 999
+  ? (d.total_content_chars/1000).toFixed(1)+"k"
+  : d.total_content_chars;
+document.getElementById("idxPct").textContent   = d.percent_indexed + "%";
+  } catch(e) {
+    console.error("Sidebar stats error:", e);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadSidebarStats);
     // ── CORPUS (10 sample documents) ──
     const CORPUS = [
       { id:1,  type:'pdf',    title:'Machine Learning — Unit 3 Notes',            path:'/uploads/ml_unit3.pdf',          date:'2026-02-10', size:'2.1 MB',

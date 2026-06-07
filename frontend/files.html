@@ -865,6 +865,28 @@
 
 
   <script>
+async function deleteFile(fileId) {
+  if (!confirm("Delete this file? This cannot be undone.")) return;
+
+  try {
+    const res = await fetch(`http://127.0.0.1:9000/library/delete/${fileId}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert("Delete failed: " + (err.detail || "Unknown error"));
+      return;
+    }
+
+    // Remove the row from UI
+    loadLibraryFiles(); // reload the file list
+  } catch (e) {
+    alert("Cannot connect to server.");
+  }
+}
+
     // ══════════════════════════════════════
     // DATA — pre-loaded files in the library
     // ══════════════════════════════════════
@@ -1253,15 +1275,30 @@ function updateQueueItemStatus(item) {
         gap:10px;
       ">
 
-        <span style="
-          font-size:11px;
-          padding:4px 10px;
-          border-radius:999px;
-          background:var(--cyan-soft);
-          color:var(--cyan);
-        ">
-          ${file.type.toUpperCase()}
-        </span>
+        <div style="display:flex;align-items:center;gap:10px;">
+  <span style="
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:var(--cyan-soft);
+    color:var(--cyan);
+  ">
+    ${file.type.toUpperCase()}
+  </span>
+  <button onclick="deleteFile(event, ${file.id})" style="
+    background:rgba(255,80,80,0.1);
+    border:1px solid rgba(255,80,80,0.3);
+    color:#ff5050;
+    border-radius:8px;
+    padding:5px 10px;
+    font-size:11px;
+    cursor:pointer;
+    transition:background 0.2s;
+  " onmouseover="this.style.background='rgba(255,80,80,0.25)'"
+     onmouseout="this.style.background='rgba(255,80,80,0.1)'">
+    🗑 Delete
+  </button>
+</div>
 
       </div>
     `;
