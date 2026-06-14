@@ -846,56 +846,68 @@
   }
 }
 
-    function askAI(text) {
-      // Hide suggestions after first message
-      document.getElementById('aiSuggestions').style.display = 'none';
+    async function askAI(text) {
+  document.getElementById('aiSuggestions').style.display = 'none';
+  const msgs = document.getElementById('aiMessages');
 
-      const msgs = document.getElementById('aiMessages');
+  // Show user message
+  msgs.innerHTML += `
+    <div style="display:flex;gap:8px;flex-direction:row-reverse">
+      <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#ff3a7a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;flex-shrink:0">M3</div>
+      <div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);border-radius:12px 4px 12px 12px;padding:9px 12px;font-size:12.5px;line-height:1.6;max-width:85%">${text.replace(/</g,'&lt;')}</div>
+    </div>`;
 
-      // Add user message
-      msgs.innerHTML += `
-        <div style="display:flex;gap:8px;align-items:flex-start;flex-direction:row-reverse">
-          <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--magenta));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;flex-shrink:0">M3</div>
-          <div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);border-radius:12px 4px 12px 12px;padding:9px 12px;font-size:12.5px;line-height:1.6;color:var(--text);max-width:85%">${escapeHTML(text)}</div>
-        </div>`;
-      msgs.scrollTop = msgs.scrollHeight;
+  // Show thinking indicator
+  const tid = 't' + Date.now();
+  msgs.innerHTML += `
+    <div id="${tid}" style="display:flex;gap:8px">
+      <div style="width:26px;height:26px;border-radius:50%;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div>
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;color:var(--text-dim)">Searching your documents...</div>
+    </div>`;
+  msgs.scrollTop = msgs.scrollHeight;
 
-      // Typing indicator
-      const typingId = 'typing-' + Date.now();
-      msgs.innerHTML += `
-        <div id="${typingId}" style="display:flex;gap:8px;align-items:flex-start">
-          <div style="width:26px;height:26px;border-radius:50%;background:var(--pur-soft);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div>
-          <div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;color:var(--text-dim)">
-            <span style="display:flex;gap:4px">
-              <span style="animation:bounce 1.2s infinite;display:inline-block">·</span>
-              <span style="animation:bounce 1.2s .2s infinite;display:inline-block">·</span>
-              <span style="animation:bounce 1.2s .4s infinite;display:inline-block">·</span>
-            </span>
-          </div>
-        </div>`;
-      msgs.scrollTop = msgs.scrollHeight;
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch('http://127.0.0.1:9000/api/assistant/ask', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ question: text })
+    });
 
-      // Simulated reply — replace with real API call later
-      const replies = {
-        'summarize my notes':    'I can summarize your uploaded notes! Once the backend is connected, I\'ll analyze your PDFs and give you a concise summary of key topics. 📄',
-        'explain tfidf':         'TF-IDF stands for Term Frequency × Inverse Document Frequency. TF measures how often a word appears in a document. IDF penalizes common words. The product gives each word a relevance score. Higher score = more important to that document. 📊',
-        'what topics to study?': 'Based on your uploaded question papers, the most repeated topics are: Data Structures (trees, graphs), Networking (TCP/IP, OSI), and ML fundamentals. Focus on these for the exam! 🎯',
-      };
+    const data = await res.json();
+    const answer = res.ok ? (data.answer || 'No answer returned') : (data.detail || 'Error occurred');
 
-      const key     = text.toLowerCase().replace(/[^a-z\s]/g,'').trim();
-      const matched = Object.keys(replies).find(k => key.includes(k.split(' ')[0]));
-      const reply   = matched ? replies[matched] : `I received your question: "${text}". Once the AI backend (OpenAI API) is connected, I'll give you a full answer. For now I'm running in demo mode! 🤖`;
+    const sourcesHtml = data.sources?.length ? `
+      <div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.07);font-size:11px;color:#445">
+        Sources: ${data.sources.map(s => `<span style="color:#a855f7">${s.filename}</span>`).join(', ')}
+      </div>` : '';
 
-      setTimeout(() => {
-        const typing = document.getElementById(typingId);
-        if (typing) typing.outerHTML = `
-          <div style="display:flex;gap:8px;align-items:flex-start">
-            <div style="width:26px;height:26px;border-radius:50%;background:var(--pur-soft);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div>
-            <div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;line-height:1.6;color:var(--text-mid);max-width:85%">${reply}</div>
-          </div>`;
-        msgs.scrollTop = msgs.scrollHeight;
-      }, 1400);
-    }
+    const el = document.getElementById(tid);
+    if (el) el.outerHTML = `
+      <div style="display:flex;gap:8px">
+        <div style="width:26px;height:26px;border-radius:50%;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div>
+        <div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;line-height:1.6;color:var(--text-mid);max-width:85%">
+          ${answer.replace(/\n/g,'<br>')}
+          ${sourcesHtml}
+        </div>
+      </div>`;
+
+  } catch(err) {
+    const el = document.getElementById(tid);
+    if (el) el.outerHTML = `
+      <div style="display:flex;gap:8px">
+        <div style="width:26px;height:26px;border-radius:50%;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div>
+        <div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;color:#ff5050;max-width:85%">
+          ⚠ Cannot connect to server
+        </div>
+      </div>`;
+  }
+
+  msgs.scrollTop = msgs.scrollHeight;
+}
 
     function escapeHTML(s) {
       return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
