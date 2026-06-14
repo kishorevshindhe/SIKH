@@ -674,7 +674,45 @@
   <script>
     function toggleAI(){const p=document.getElementById('aiPanel'),b=document.getElementById('aiBtn'),o=p.style.display==='flex';p.style.display=o?'none':'flex';b.style.background=o?'':'rgba(168,85,247,0.1)';}
     function sendAI(){const i=document.getElementById('aiInput');if(i.value.trim()){askAI(i.value.trim());i.value='';}}
-    function askAI(text){document.getElementById('aiSuggestions').style.display='none';const msgs=document.getElementById('aiMessages');msgs.innerHTML+=`<div style="display:flex;gap:8px;flex-direction:row-reverse"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#ff3a7a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;flex-shrink:0">M3</div><div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);border-radius:12px 4px 12px 12px;padding:9px 12px;font-size:12.5px;line-height:1.6;max-width:85%">${text.replace(/</g,'&lt;')}</div></div>`;const tid='t'+Date.now();msgs.innerHTML+=`<div id="${tid}" style="display:flex;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div><div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;color:var(--text-dim)">···</div></div>`;msgs.scrollTop=msgs.scrollHeight;const r={'summarize':'Connect the backend to get full PDF summaries! 📄','tfidf':'TF-IDF = Term Frequency × Inverse Document Frequency. Rare important words score higher! 📊','topics':'Focus on: Data Structures, Networking (TCP/IP), ML fundamentals. 🎯'};const k=text.toLowerCase();const m=Object.entries(r).find(([key])=>k.includes(key));setTimeout(()=>{const el=document.getElementById(tid);if(el)el.outerHTML=`<div style="display:flex;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div><div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;line-height:1.6;color:var(--text-mid);max-width:85%">${m?m[1]:'I received: "'+text+'". Connect the OpenAI backend for full answers! 🤖'}</div></div>`;msgs.scrollTop=msgs.scrollHeight;},1400);}
+async function askAI(text) {
+  document.getElementById('aiSuggestions').style.display = 'none';
+  const msgs = document.getElementById('aiMessages');
+
+  msgs.innerHTML += `<div style="display:flex;gap:8px;align-items:flex-start;flex-direction:row-reverse"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--magenta));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;flex-shrink:0">M3</div><div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);border-radius:12px 4px 12px 12px;padding:9px 12px;font-size:12.5px;line-height:1.6;color:var(--text);max-width:85%">${text.replace(/</g,'&lt;')}</div></div>`;
+
+  const tid = 't' + Date.now();
+  msgs.innerHTML += `<div id="${tid}" style="display:flex;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div><div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;color:var(--text-dim)">Searching your documents...</div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch('http://127.0.0.1:9000/api/assistant/ask', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ question: text })
+    });
+
+    const data = await res.json();
+    const answer = res.ok ? (data.answer || 'No answer returned') : (data.detail || 'Error occurred');
+
+    const sourcesHtml = data.sources?.length ? `
+      <div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.07);font-size:11px;color:#445">
+        Sources: ${data.sources.map(s => `<span style="color:#a855f7">${s.filename}</span>`).join(', ')}
+      </div>` : '';
+
+    const el = document.getElementById(tid);
+    if (el) el.outerHTML = `<div style="display:flex;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div><div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;line-height:1.6;color:var(--text-mid);max-width:85%">${answer.replace(/\n/g,'<br>')}${sourcesHtml}</div></div>`;
+
+  } catch(err) {
+    const el = document.getElementById(tid);
+    if (el) el.outerHTML = `<div style="display:flex;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:rgba(168,85,247,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div><div style="background:var(--surface);border:1px solid var(--border2);border-radius:4px 12px 12px 12px;padding:9px 12px;font-size:12.5px;color:#ff5050;max-width:85%">⚠ Cannot connect to server</div></div>`;
+  }
+
+  msgs.scrollTop = msgs.scrollHeight;
+}
   </script>
 
   <!-- ══════════ PAGE ══════════ -->
